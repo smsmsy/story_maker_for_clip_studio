@@ -526,6 +526,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String generateContentsToTextFile() {
+
     String s = "";
     for (int i = 0; i < contentList.length; i++) {
       if(contentList[i].line.isEmpty) continue;
