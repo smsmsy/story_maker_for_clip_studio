@@ -483,9 +483,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
-          return SingleChildScrollView(
-            child: Container(
-              margin: const EdgeInsets.all(30),
+          return Scrollbar(
+            isAlwaysShown: true,
+            child: SingleChildScrollView(
               child: AlertDialog(
                   title: const Text("ネームチェンジャー用出力プレビュー"),
                   content: Flexible(
