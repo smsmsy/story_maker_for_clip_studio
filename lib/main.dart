@@ -483,12 +483,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
-          return Scrollbar(
-            isAlwaysShown: true,
-            child: SingleChildScrollView(
-              child: AlertDialog(
-                  title: const Text("ネームチェンジャー用出力プレビュー"),
-                  content: Flexible(
+          return AlertDialog(
+              title: const Text("ネームチェンジャー用出力プレビュー"),
+              content: Scrollbar(
+                child: SingleChildScrollView(
+                  child: Flexible(
                     child: Container(
                       padding: const EdgeInsets.all(_edgeValueMedium),
                       margin: const EdgeInsets.all(_edgeValueMedium),
@@ -502,24 +501,24 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
-                  actions: <Widget>[
-                    ElevatedButton(
-                        child: const Text("クリップボードにコピー"),
-                        onPressed: () async{
-                          final data = ClipboardData(text: contentsForOutputToNameChanger);
-                          await Clipboard.setData(data);
-                        }
-                    ),
-                    TextButton(
-                        child: const Text("閉じる"),
-                        onPressed: () {
-                          contentsForOutputToNameChanger = "";
-                          Navigator.of(context).pop();
-                        }
-                    ),
-                  ]
+                ),
               ),
-            ),
+              actions: <Widget>[
+                ElevatedButton(
+                    child: const Text("クリップボードにコピー"),
+                    onPressed: () async{
+                      final data = ClipboardData(text: contentsForOutputToNameChanger);
+                      await Clipboard.setData(data);
+                    }
+                ),
+                TextButton(
+                    child: const Text("閉じる"),
+                    onPressed: () {
+                      contentsForOutputToNameChanger = "";
+                      Navigator.of(context).pop();
+                    }
+                ),
+              ]
           );
         }
     );
