@@ -478,7 +478,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _outputForNameChanger(BuildContext context) async{
     String contentsForOutputToNameChanger = "";
-    contentsForOutputToNameChanger = generateContentsToTextFile();
+    contentsForOutputToNameChanger = await generateContentsToTextFile();
 
     return showDialog<void>(
         context: context,
@@ -497,7 +497,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     child: Text(
                       contentsForOutputToNameChanger,
-                      maxLines: null,
+                      // maxLines: null,
                     ),
                   ),
                 ),
