@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
 import 'add_person_page.dart';
 import 'color_setting_dialog.dart';
 import 'content_class.dart';
@@ -22,6 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(brightness: Brightness.light, fontFamily: "源柔ゴシックＰ",),
       darkTheme: ThemeData(brightness: Brightness.dark, fontFamily: "源柔ゴシックＰ",),
       home: const MyHomePage(title: 'まんが用プロット作成ツール',),
@@ -59,13 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 
     personList.add(Person("サンプル 太郎", Colors.blue));
-    personList.add(Person("サンプル 222", Colors.red));
-    personList.add(Person("サンプル 333", Colors.green));
 
     contentList.add(Content(memo, "ここにセリフや心情を追加し、プロットを作成することができます。"));
-    contentList.add(Content(personList[0], "22222222222"));
-    contentList.add(Content(personList[1], "33333333333333333333"));
-    contentList.add(Content(personList[2], "444444444444444"));
 
     for(int i = 0; i < contentList.length; i++){
       controllers.add(TextEditingController(text: contentList[i].line));
@@ -527,6 +522,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     String s = "";
     for (int i = 0; i < contentList.length; i++) {
+      if(contentList[i].person == memo) continue;
       if(contentList[i].line.isEmpty) continue;
       s += contentList[i].line;
       if(i != contentList.length - 1) s += "\n\n";
