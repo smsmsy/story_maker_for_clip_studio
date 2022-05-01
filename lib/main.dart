@@ -341,19 +341,16 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
       ),
-      child: Expanded(
-        child: Center(
-          child: ListTile(
-            onTap: () {
-              setState(() {
-                contents.add(Content(personsCombinedMemo[index], ""));
-              });
-              controllers.add(TextEditingController());
-              controllers[controllers.length-1].addListener(_reflectTextValueForContentsView);
-            },
-            title: Text(personsCombinedMemo[index].name),
-            // trailing: Text("■", style: TextStyle(color: personsCombinedMemo[index].color),),
-          ),
+      child: Center(
+        child: ListTile(
+          onTap: () {
+            setState(() {
+              contents.add(Content(personsCombinedMemo[index], ""));
+            });
+            controllers.add(TextEditingController());
+            controllers[controllers.length-1].addListener(_reflectTextValueForContentsView);
+          },
+          title: Text(personsCombinedMemo[index].name,),
         ),
       ),
     );
