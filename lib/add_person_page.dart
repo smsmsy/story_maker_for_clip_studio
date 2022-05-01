@@ -5,7 +5,7 @@ import 'color_setting_dialog.dart';
 import 'person_class.dart';
 
 class AddPersonPage extends StatefulWidget {
-  AddPersonPage({Key? key}) : super(key: key);
+  const AddPersonPage({Key? key}) : super(key: key);
 
   @override
   _AddPersonPageState createState() => _AddPersonPageState();
