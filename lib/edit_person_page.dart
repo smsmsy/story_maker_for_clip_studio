@@ -99,13 +99,12 @@ class _EditPersonPageState extends State<EditPersonPage> {
   }
 
   void _editPerson() {
-    if(person.name.isNotEmpty){
-      if(person.name == "メモ") {
-        _showErrorDialog(context);
-      } else {
-        return Navigator.pop(context, person);
-      }
+    if(person.name.isEmpty) return;
+    if(person.name == "メモ") {
+      _showErrorDialog(context);
+      return;
     }
+    return Navigator.pop(context, person);
   }
 
   Future<void> _showErrorDialog(BuildContext context) async {

@@ -21,20 +21,6 @@ class _AddPersonPageState extends State<AddPersonPage> {
   bool _isSelected = false;
   void _handleCheckBox(bool? value) => setState(()  => _isSelected = value!);
 
-  void _addPerson() {
-    if (kDebugMode) {
-      print(person.name);
-      print(person.color);
-    }
-    if(person.name.isNotEmpty){
-      if(person.name == "メモ") {
-        _showErrorDialog(context);
-      } else {
-        return Navigator.pop(context, person);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -123,14 +109,15 @@ class _AddPersonPageState extends State<AddPersonPage> {
     );
   }
 
-  Future<Color?> openDialog(BuildContext context) {
-    return showDialog<Color>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return ColorSettingDialog(person.color);
-        }
-    );
+  void _addPerson() {
+    if(person.name.isEmpty) {
+      return;
+    }
+    if(person.name == "メモ"){
+      _showErrorDialog(context);
+      return;
+    }
+    return Navigator.pop(context, person);
   }
 
   Future<void> _showErrorDialog(BuildContext context) async {
@@ -153,4 +140,15 @@ class _AddPersonPageState extends State<AddPersonPage> {
         }
     );
   }
+
+  Future<Color?> openDialog(BuildContext context) {
+    return showDialog<Color>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return ColorSettingDialog(person.color);
+        }
+    );
+  }
+
 }

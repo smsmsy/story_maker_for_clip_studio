@@ -8,6 +8,8 @@ import 'content_class.dart';
 import 'edit_person_page.dart';
 import 'person_class.dart';
 
+import 'package:scroll_to_index/scroll_to_index.dart';
+
 enum ResultAlertDialog {
   ok, cancel,
 }
@@ -44,7 +46,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   static const double _radiusValue = 5.0;
   static const double _edgeValueLarge = 15.0;
   static const double _edgeValueMedium = 8.0;
@@ -52,43 +54,76 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Person> persons = [];
   List<Person> personsCombinedMemo = [];
-
   List<Content> contents = [];
-  List<TextEditingController> controllers = [];
+  List<TextEditingController> textEditingControllers = [];
   final Person memo = Person("メモ", Colors.grey);
+
+  /// for scroll_to_index
+  final scrollDirection = Axis.vertical;
+  late AutoScrollController autoScrollController;
 
   late Brightness brightness;
   late bool isDarkMode;
+  late Color textButtonColor;
+  bool _expandedSettingsView = false;
+
+  Brightness? _brightness;
+  bool isDark = false;
 
   @override
   void initState() {
     super.initState();
 
+    autoScrollController = AutoScrollController(
+        viewportBoundaryGetter: () => Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
+        axis: scrollDirection
+    );
+    // autoScrollController.addListener(() {print("");});
+
     brightness = SchedulerBinding.instance!.window.platformBrightness;
     isDarkMode = brightness == Brightness.dark;
+
+    WidgetsBinding.instance?.addObserver(this);
+    _brightness = WidgetsBinding.instance?.window.platformBrightness;
+    _brightness = WidgetsBinding.instance?.window.platformBrightness;
+    isDark = _brightness == Brightness.dark;
+    textButtonColor = isDarkMode ? Colors.white : Colors.black;
 
     persons.add(Person("サンプル 太郎", Colors.blue));
     contents.add(Content(memo, "ここにセリフや心情を追加し、プロットを作成することができます。"));
 
     for(int i = 0; i < contents.length; i++){
-      controllers.add(TextEditingController(text: contents[i].line));
-      controllers[i].addListener(_reflectTextValueForContentsView);
+      textEditingControllers.add(TextEditingController(text: contents[i].line));
+      textEditingControllers[i].addListener(_reflectTextValueForContentsView);
     }
   }
 
+  @override
+  void didChangePlatformBrightness() {
+    if (mounted) {
+      setState(() {
+        _brightness = WidgetsBinding.instance?.window.platformBrightness;
+        isDark = _brightness == Brightness.dark;
+        textButtonColor = isDark ? Colors.white : Colors.black;
+      });
+    }
+    super.didChangePlatformBrightness();
+  }
+
   void _reflectTextValueForContentsView() {
-    for(int i = 0; i < controllers.length; i++){
-      contents[i].line = controllers[i].text;
+    for(int i = 0; i < textEditingControllers.length; i++){
+      contents[i].line = textEditingControllers[i].text;
     }
   }
 
   @override
   void dispose() {
-    for (var controller in controllers) {controller.dispose();}
+    WidgetsBinding.instance?.removeObserver(this);
+    autoScrollController.dispose();
+    for (var controller in textEditingControllers) {controller.dispose();}
     super.dispose();
   }
 
-  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// SettingsView
                 Container(
                   padding: const EdgeInsets.all(_edgeValueMedium),
                   color: isDarkMode ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
@@ -109,12 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       title: Text(
-                        _expanded ? "設定を閉じる" : "設定を開く",
-                        style: const TextStyle(fontSize: 20),),
-                      // collapsedBackgroundColor: isDarkMode ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-                      // backgroundColor: isDarkMode ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+                        _expandedSettingsView ? "設定を閉じる" : "設定を開く",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onExpansionChanged: (changed) {
-                        _expanded = changed;
+                        _expandedSettingsView = changed;
                         setState(() {});
                       },
                       children: [
@@ -122,9 +160,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         Container(
                           margin: EdgeInsets.zero,
                           width: double.infinity,
-                          decoration: const BoxDecoration(border: Border(bottom: BorderSide(width: 1,))),
                           child: ListTile(
-                            title: const Text('■ 登場人物設定', style: TextStyle(fontSize: 18),),
+                            title: const Text('■ 登場人物設定', style: TextStyle(fontSize: 20),),
                             trailing: ElevatedButton(
                               onPressed: () async {
                                 final result = await Navigator.pushNamed(context, '/add-person-page');
@@ -140,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
                           ),
                           margin: const EdgeInsets.only(top: 5.0),
-                          height: 120.0,
+                          height: 230.0,
                           child: ListView.builder(
                             itemCount: persons.length,
                             itemBuilder: (context, index) {
@@ -160,6 +197,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                       });
                                     }
                                   },
+                                  leading: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "No." + (index+1).toString(),
+                                        style: TextStyle(
+                                          color: contents[index].person.color,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   title: Row(
                                     children: <Widget>[
                                       ConstrainedBox(
@@ -201,19 +250,19 @@ class _MyHomePageState extends State<MyHomePage> {
                             },
                           ),
                         ),
-                        /// メモ設定
-                        Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
-                          child: const ListTile(
-                            title: Text('■ メモ設定', style: TextStyle(fontSize: 18),),
-                          ),
-                        ),
                         Padding(
                           padding: const EdgeInsets.all(_edgeValueMedium),
                           child: Row(
                             children: [
-                              const Flexible(child: Text("色設定：")),
+                              Flexible(
+                                  child: Text(
+                                    "メモの色設定：",
+                                    style: TextStyle(
+                                      color: textButtonColor,
+                                      fontSize: 20,
+                                    ),
+                                  )
+                              ),
                               const SizedBox(width: 10.0,),
                               SizedBox(
                                 child: TextButton(
@@ -223,7 +272,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   },
                                   child: Text("■", style: TextStyle(color: memo.color, fontSize: 30.0,),),
                                   style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(color: Color(0x33000000), width: 2.0,),
+                                    padding: EdgeInsets.zero,
+                                    side: const BorderSide(color: Colors.blue, width: 2.0,),
                                   ),
                                 ),
                               ),
@@ -235,38 +285,41 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
 
-
-                /// コンテンツ画面
+                /// ContentsView
+                // Container(
+                //   margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                //   width: double.infinity,
+                //   child: const ListTile(
+                //     title: Text('■ コンテンツビュー', style: TextStyle(fontSize: 20),),
+                //   ),
+                // ),
                 Container(
-                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  width: double.infinity,
-                  child: const ListTile(
-                    title: Text('■ コンテンツビュー', style: TextStyle(fontSize: 20),),
+                  margin: const EdgeInsets.only(bottom: _edgeValueMedium, top: _edgeValueLarge),
+                  height: 50.0,
+                  // width: 500,
+                  child: ListView.builder(
+                    controller: autoScrollController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: persons.length + 1,
+                    itemBuilder: (BuildContext context, int index){
+                      return personListViewOfContentsView(index);
+                    },
                   ),
                 ),
-
-                Container(
-                  padding: const EdgeInsets.all(_edgeValueMedium),
-                  height: 70.0,
-                  child: Center(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: persons.length + 1,
-                      itemBuilder: (BuildContext context, int index){
-                        return personListViewOfContentsView(index);
-                      },
-                    ),
-                  ),
-                ),
-
                 Container(
                   decoration: BoxDecoration(border: Border.all(width: 2),),
                   padding: const EdgeInsets.all(_edgeValueMedium),
                   height: 500,
                   child: ReorderableListView.builder(
+                    buildDefaultDragHandles: true,
                     itemCount: contents.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return contentListViewOfContentsView(index);
+                      return AutoScrollTag (
+                        key: ValueKey(index),
+                        controller: autoScrollController,
+                        index: index,
+                        child: _getRow(index, 30),
+                      );
                     },
                     onReorder: (int oldIndex, int newIndex) {
                       _updateContentListForReorder(oldIndex, newIndex);
@@ -274,50 +327,70 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
 
-                /// 出力
-                Container(
-                  margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
-                  width: double.infinity,
-                  decoration: const BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
-                  child: const ListTile(title: Text('■ 出力', style: TextStyle(fontSize: 20),)),
+                /// OutputsView
+                // Container(
+                //   margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+                //   width: double.infinity,
+                //   // decoration: const BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
+                //   child: const ListTile(title: Text('■ 出力', style: TextStyle(fontSize: 20),)),
+                // ),
+                const Divider(
+                  thickness: 1.0,
+                  height: 20.0,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ConstrainedBox(
-                          constraints: const BoxConstraints(minWidth: 50.0, minHeight: 30.0),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ConstrainedBox(
+                          constraints: const BoxConstraints(),
                           child: ElevatedButton(
-                            onPressed: () => _outputForReading(context),
-                            child: const Text("見る用に出力", style: TextStyle(fontSize: 20),),
+                            child: const Text("読む用に出力", style: TextStyle(fontSize: 15),),
+                            onPressed: () async {
+                              // contentsに未入力があれば未入力はスキップされる旨を警告する。
+                              bool hasEmpty = false;
+                              for (var content in contents) {
+                                if(content.line.isEmpty)hasEmpty = true;
+                              }
+                              if(hasEmpty) {
+                                ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                                if(selection == ResultAlertDialog.ok){
+                                  _outputForReading(context);
+                                }
+                              } else {
+                                _outputForReading(context);
+                              }
+                            },
                           )
                       ),
-                      const SizedBox(width: 30.0,),
-                      ConstrainedBox(
-                          constraints: const BoxConstraints(minWidth: 50.0, minHeight: 30.0),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ConstrainedBox(
+                          constraints: const BoxConstraints(),
                           child: ElevatedButton(
-                              onPressed: () async {
-                                bool hasEmpty = false;
-                                for (var content in contents) {
-                                  if(content.line.isEmpty)  {
-                                    hasEmpty = true;
-                                  }
-                                }
-                                if(hasEmpty) {
-                                  ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                                  if(selection == ResultAlertDialog.ok){
-                                    _outputForNameChanger(context);
-                                  }
-                                } else {
+                            child: const Text("クリスタ用に出力", style: TextStyle(fontSize: 15),),
+                            onPressed: () async {
+                              // contentsに未入力があれば未入力はスキップされる旨を警告する。
+                              bool hasEmpty = false;
+                              for (var content in contents) {
+                                if(content.line.isEmpty)hasEmpty = true;
+                              }
+                              if(hasEmpty) {
+                                ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                                if(selection == ResultAlertDialog.ok){
                                   _outputForNameChanger(context);
                                 }
-                              },
-                              child: const Text("ネームチェンジャー用に出力", style: TextStyle(fontSize: 20),)
+                              } else {
+                                _outputForNameChanger(context);
+                              }
+                            },
                           )
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -332,34 +405,64 @@ class _MyHomePageState extends State<MyHomePage> {
     if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
 
     return Container(
-      margin: const EdgeInsets.only(right: _edgeValueMedium),
-      width: 150,
+      margin: const EdgeInsets.only(right: _edgeValueSmall),
+      width: 100,
       decoration: BoxDecoration(
           border: Border.all(
-            width: 1.0,
+            width: 2.0,
             color: personsCombinedMemo[index].color,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
       ),
-      child: Center(
-        child: ListTile(
-          onTap: () {
-            setState(() {
-              contents.add(Content(personsCombinedMemo[index], ""));
-            });
-            controllers.add(TextEditingController());
-            controllers[controllers.length-1].addListener(_reflectTextValueForContentsView);
-          },
-          title: Text(personsCombinedMemo[index].name,),
+      child: TextButton(
+        onPressed: () {
+          setState(() {
+            contents.add(Content(personsCombinedMemo[index], ""));
+            _scrollToIndex(index);
+          });
+          textEditingControllers.add(TextEditingController());
+          textEditingControllers[textEditingControllers.length-1].addListener(_reflectTextValueForContentsView);
+        },
+        child: Padding(
+          padding: EdgeInsets.zero,
+          child: Text(
+            personsCombinedMemo[index].name,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              fontSize: 12,
+              color: textButtonColor,
+            ),
+          ),
         ),
       ),
     );
   }
 
+  Future _scrollToIndex(int index) async{
+    await autoScrollController.scrollToIndex(index, preferPosition: AutoScrollPosition.end,);
+  }
+
+  Widget _getRow(int index, double height) {
+    return _wrapScrollTag(
+      index: index,
+      child: contentListViewOfContentsView(index),
+    );
+  }
+
+  Widget _wrapScrollTag({required int index, required Widget child}) =>
+      AutoScrollTag(
+        key: ValueKey(index),
+        controller: autoScrollController,
+        index: index,
+        child: child,
+        highlightColor: Colors.black.withOpacity(0.1),
+      );
+
   Widget contentListViewOfContentsView(int index) {
     return ListTile(
       key: Key('$index'),
-      contentPadding: const EdgeInsets.fromLTRB(_edgeValueLarge, _edgeValueMedium, 30, 0),
+      contentPadding: const EdgeInsets.only(left: 20.0, right: _edgeValueLarge),
+      // contentPadding: const EdgeInsets.fromLTRB(_edgeValueLarge, _edgeValueMedium, 30, 0),
       leading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -372,44 +475,48 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      title: TextFormField(
-        decoration: InputDecoration(
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(_radiusValue),
-            borderSide: BorderSide(
+      title: Transform.translate(
+        offset: const Offset(10, 0),
+        child: TextFormField(
+          decoration: InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(_radiusValue),
+              borderSide: BorderSide(
+                color: contents[index].person.color,
+                width: 2.0,
+              ),
+            ),
+            labelStyle: TextStyle(
+              fontSize: 12,
               color: contents[index].person.color,
-              width: 2.0,
+            ),
+            labelText: contents[index].person.name,
+            floatingLabelStyle: TextStyle(
+              fontSize: 16,
+              color: contents[index].person.color,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(_radiusValue),
+              borderSide: BorderSide(
+                color: contents[index].person.color,
+                width: 1.0,
+              ),
             ),
           ),
-          labelStyle: TextStyle(
-            fontSize: 12,
-            color: contents[index].person.color,
-          ),
-          labelText: contents[index].person.name,
-          floatingLabelStyle: TextStyle(
-            fontSize: 16,
-            color: contents[index].person.color,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(_radiusValue),
-            borderSide: BorderSide(
-              color: contents[index].person.color,
-              width: 1.0,
-            ),
-          ),
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          controller: textEditingControllers[index],
         ),
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        controller: controllers[index],
       ),
+
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextButton(
             onPressed: () {
               setState(() {
-                controllers[index].removeListener(_reflectTextValueForContentsView);
-                controllers.removeAt(index);
+                textEditingControllers[index].removeListener(_reflectTextValueForContentsView);
+                textEditingControllers.removeAt(index);
                 contents.removeAt(index);
               });
             },
@@ -569,11 +676,11 @@ class _MyHomePageState extends State<MyHomePage> {
     if(oldIndex < newIndex){
       newIndex -= 1;
     }
-    final TextEditingController newController = controllers.removeAt(oldIndex);
+    final TextEditingController newController = textEditingControllers.removeAt(oldIndex);
     final Content newContent = contents.removeAt(oldIndex);
     contents.insert(newIndex, newContent);
-    controllers.insert(newIndex, newController);
-    controllers[newIndex].addListener(() {
+    textEditingControllers.insert(newIndex, newController);
+    textEditingControllers[newIndex].addListener(() {
       _reflectTextValueForContentsView();
     });
   }
