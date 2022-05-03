@@ -202,10 +202,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                                     children: [
                                       Text(
                                         "No." + (index+1).toString(),
-                                        style: TextStyle(
-                                          color: contents[index].person.color,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        style: const TextStyle(fontWeight: FontWeight.bold,),
                                       ),
                                     ],
                                   ),
@@ -285,14 +282,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                   ),
                 ),
 
-                /// ContentsView
-                // Container(
-                //   margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                //   width: double.infinity,
-                //   child: const ListTile(
-                //     title: Text('■ コンテンツビュー', style: TextStyle(fontSize: 20),),
-                //   ),
-                // ),
                 Container(
                   margin: const EdgeInsets.only(bottom: _edgeValueMedium, top: _edgeValueLarge),
                   height: 50.0,
@@ -327,13 +316,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                   ),
                 ),
 
-                /// OutputsView
-                // Container(
-                //   margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
-                //   width: double.infinity,
-                //   // decoration: const BoxDecoration(border: Border(bottom: BorderSide(width: 1))),
-                //   child: const ListTile(title: Text('■ 出力', style: TextStyle(fontSize: 20),)),
-                // ),
                 const Divider(
                   thickness: 1.0,
                   height: 20.0,
@@ -349,14 +331,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                           child: ElevatedButton(
                             child: const Text("読む用に出力", style: TextStyle(fontSize: 15),),
                             onPressed: () async {
-                              // contentsに未入力があれば未入力はスキップされる旨を警告する。
-                              bool hasEmpty = false;
-                              for (var content in contents) {
-                                if(content.line.isEmpty)hasEmpty = true;
-                              }
-                              if(hasEmpty) {
+                              if(contents.any((content) => content.line == "")){
                                 ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                                if(selection == ResultAlertDialog.ok){
+                                if(selection == ResultAlertDialog.ok) {
                                   _outputForReading(context);
                                 }
                               } else {
@@ -373,12 +350,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                           child: ElevatedButton(
                             child: const Text("クリスタ用に出力", style: TextStyle(fontSize: 15),),
                             onPressed: () async {
-                              // contentsに未入力があれば未入力はスキップされる旨を警告する。
-                              bool hasEmpty = false;
-                              for (var content in contents) {
-                                if(content.line.isEmpty)hasEmpty = true;
-                              }
-                              if(hasEmpty) {
+                              if(contents.any((content) => content.line == "")){
                                 ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
                                 if(selection == ResultAlertDialog.ok){
                                   _outputForNameChanger(context);
