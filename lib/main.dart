@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +11,16 @@ import 'edit_person_page.dart';
 import 'person_class.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
+
+
+// import 'dart:async';
+// import 'dart:convert' show json;
+//
+// import 'package:flutter/material.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:http/http.dart' as http;
+
+import 'package:file_picker/file_picker.dart';
 
 enum ResultAlertDialog {
   ok, cancel,
@@ -128,7 +140,43 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title),),
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.fromWindowPadding(WindowPadding.zero, 8.0),
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.save),
+                title: const Text("プロジェクトファイルを保存"),
+                onTap: () async {
+                  /// TODO: ファイル保存処理は未実装のため、何かしら代替手段を考える必要がある
+                  String? outputFile = await FilePicker.platform.saveFile(
+                    dialogTitle: 'Please select an output file:',
+                    fileName: 'output-file.txt',
+                  );
+                  if (outputFile == null) {
+                    // User canceled the picker
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.open_in_browser),
+                title: const Text("プロジェクトファイルを開く"),
+                onTap: () async {
+                  final result = await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false);
+                  if (result != null && result.files.isNotEmpty) {
+                    final fileBytes = result.files.first.bytes;
+                    final fileName = result.files.first.name;
+                    /// TODO: firebase_storageでファイルをダウンロード・アップロードする処理を加えると扱えるっぽい。
+                    print(fileName);
+                  }
+                },
+              ),
+            ],
+          )
+      ),
       body: Scrollbar(
         isAlwaysShown: true,
         child: SingleChildScrollView(
