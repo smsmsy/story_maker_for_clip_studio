@@ -24,6 +24,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="story_maker_for_clip_studio">
+  <meta name="google-signin-client_id" content="628889398243-n8fclfq3f957hekiioaabnaq1rmjfq4v.apps.googleusercontent.com">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
@@ -31,6 +32,7 @@
 
   <title>story_maker_for_clip_studio</title>
   <link rel="manifest" href="manifest.json">
+
 </head>
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
@@ -100,5 +102,32 @@
       loadMainDartJs();
     }
   </script>
+
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-analytics.js";
+
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getAuth } from "https://www.gstatic.com/firebasejs/9.8.1/firebase/auth";
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyA2jHl8C8QXasCJ2lBhtmdZefmWiC1G5rI",
+    authDomain: "storymaker-91db2.firebaseapp.com",
+    projectId: "storymaker-91db2",
+    storageBucket: "storymaker-91db2.appspot.com",
+    messagingSenderId: "372928743036",
+    appId: "1:372928743036:web:c4550bd18050af9121ebf9",
+    measurementId: "G-6124LC93CL"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 </body>
 </html>

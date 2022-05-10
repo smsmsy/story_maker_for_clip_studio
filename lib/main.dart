@@ -10,23 +10,27 @@ import 'content_class.dart';
 import 'edit_person_page.dart';
 import 'person_class.dart';
 
-import 'package:scroll_to_index/scroll_to_index.dart';
-
-
-// import 'dart:async';
-// import 'dart:convert' show json;
-//
-// import 'package:flutter/material.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
-// import 'package:http/http.dart' as http;
-
-import 'package:file_picker/file_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 enum ResultAlertDialog {
   ok, cancel,
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+  googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+  googleProvider.setCustomParameters({
+    'login_hint': 'user@example.com'
+  });
+
   runApp(const MyApp());
 }
 
@@ -71,10 +75,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   List<TextEditingController> textEditingControllers = [];
   final Person memo = Person("メモ", Colors.grey);
 
-  /// for scroll_to_index
-  final scrollDirection = Axis.vertical;
-  late AutoScrollController autoScrollController;
-
   late Brightness brightness;
   late bool isDarkMode;
   late Color textButtonColor;
@@ -87,11 +87,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   void initState() {
     super.initState();
 
-    autoScrollController = AutoScrollController(
-        viewportBoundaryGetter: () => Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
-        axis: scrollDirection
-    );
-    // autoScrollController.addListener(() {print("");});
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      setState(() {
+        _user = user;
+      });
+    });
 
     brightness = SchedulerBinding.instance!.window.platformBrightness;
     isDarkMode = brightness == Brightness.dark;
@@ -120,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         textButtonColor = isDark ? Colors.white : Colors.black;
       });
     }
+
     super.didChangePlatformBrightness();
   }
 
@@ -132,10 +133,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
-    autoScrollController.dispose();
     for (var controller in textEditingControllers) {controller.dispose();}
     super.dispose();
   }
+
+
+  User? _user;
 
   @override
   Widget build(BuildContext context) {
@@ -148,31 +151,59 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
             padding: EdgeInsets.fromWindowPadding(WindowPadding.zero, 8.0),
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.save),
-                title: const Text("プロジェクトファイルを保存"),
-                onTap: () async {
-                  /// TODO: ファイル保存処理は未実装のため、何かしら代替手段を考える必要がある
-                  String? outputFile = await FilePicker.platform.saveFile(
-                    dialogTitle: 'Please select an output file:',
-                    fileName: 'output-file.txt',
-                  );
-                  if (outputFile == null) {
-                    // User canceled the picker
-                  }
-                },
+                title: Text(
+                  _user == null ? "ログインしていません" : "ようこそ、${_user?.displayName} さん",
+                ),
               ),
+              /// TODO : 保存処理周りをFirebase Storageで実装する。
+              // ListTile(
+              //   leading: const Icon(Icons.save),
+              //   title: const Text("プロジェクトファイルを保存"),
+              //   onTap: () async {
+              //     /// TODO: ファイル保存処理は未実装のため、何かしら代替手段を考える必要がある
+              //     String? outputFile = await FilePicker.platform.saveFile(
+              //       dialogTitle: 'Please select an output file:',
+              //       fileName: 'output-file.txt',
+              //     );
+              //     if (outputFile == null) {
+              //       // User canceled the picker
+              //     }
+              //   },
+              // ),
+              // ListTile(
+              //   leading: const Icon(Icons.open_in_browser),
+              //   title: const Text("プロジェクトファイルを開く"),
+              //   onTap: () async {
+              //     final result = await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false);
+              //     if (result != null && result.files.isNotEmpty) {
+              //       final fileBytes = result.files.first.bytes;
+              //       final fileName = result.files.first.name;
+              //       /// TODO: firebase_storageでファイルをダウンロード・アップロードする処理を加えると扱えるっぽい。
+              //       print(fileName);
+              //     }
+              //   },
+              // ),
+
               ListTile(
-                leading: const Icon(Icons.open_in_browser),
-                title: const Text("プロジェクトファイルを開く"),
-                onTap: () async {
-                  final result = await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false);
-                  if (result != null && result.files.isNotEmpty) {
-                    final fileBytes = result.files.first.bytes;
-                    final fileName = result.files.first.name;
-                    /// TODO: firebase_storageでファイルをダウンロード・アップロードする処理を加えると扱えるっぽい。
-                    print(fileName);
+                leading: Icon(
+                  _user == null ? Icons.login : Icons.logout,
+                  color: _user == null ? Colors.blue : Colors.red,
+                ),
+                title: Text(
+                  _user == null ? "Googleでログイン" : "ログアウト",
+                  style: TextStyle(
+                    color: _user == null ? Colors.blue : Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onTap: () {
+                  if(_user == null){
+                    _googleSignin();
+                  } else {
+                    _googleSignout();
                   }
                 },
+
               ),
             ],
           )
@@ -216,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                                 if(result is Person) { setState(() => persons.add(result)); }
                               },
                               child: const Icon(Icons.add),
-                            ), //,
+                            ),
                           ),
                         ),
                         Container(
@@ -288,7 +319,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                                         _showEditPersonPage(persons[index]);
                                       }
                                     },
-                                    // },
                                   ),
                                 ),
                               );
@@ -333,9 +363,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                 Container(
                   margin: const EdgeInsets.only(bottom: _edgeValueMedium, top: _edgeValueLarge),
                   height: 50.0,
-                  // width: 500,
                   child: ListView.builder(
-                    controller: autoScrollController,
                     scrollDirection: Axis.horizontal,
                     itemCount: persons.length + 1,
                     itemBuilder: (BuildContext context, int index){
@@ -351,12 +379,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                     buildDefaultDragHandles: true,
                     itemCount: contents.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return AutoScrollTag (
-                        key: ValueKey(index),
-                        controller: autoScrollController,
-                        index: index,
-                        child: _getRow(index, 30),
-                      );
+                      return contentListViewOfContentsView (index);
                     },
                     onReorder: (int oldIndex, int newIndex) {
                       _updateContentListForReorder(oldIndex, newIndex);
@@ -438,7 +461,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         onPressed: () {
           setState(() {
             contents.add(Content(personsCombinedMemo[index], ""));
-            _scrollToIndex(index);
           });
           textEditingControllers.add(TextEditingController());
           textEditingControllers[textEditingControllers.length-1].addListener(_reflectTextValueForContentsView);
@@ -458,31 +480,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     );
   }
 
-  Future _scrollToIndex(int index) async{
-    await autoScrollController.scrollToIndex(index, preferPosition: AutoScrollPosition.end,);
-  }
-
-  Widget _getRow(int index, double height) {
-    return _wrapScrollTag(
-      index: index,
-      child: contentListViewOfContentsView(index),
-    );
-  }
-
-  Widget _wrapScrollTag({required int index, required Widget child}) =>
-      AutoScrollTag(
-        key: ValueKey(index),
-        controller: autoScrollController,
-        index: index,
-        child: child,
-        highlightColor: Colors.black.withOpacity(0.1),
-      );
-
   Widget contentListViewOfContentsView(int index) {
     return ListTile(
       key: Key('$index'),
       contentPadding: const EdgeInsets.only(left: 20.0, right: _edgeValueLarge),
-      // contentPadding: const EdgeInsets.fromLTRB(_edgeValueLarge, _edgeValueMedium, 30, 0),
       leading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -626,7 +627,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                     ),
                     child: Text(
                       contentsForOutputToNameChanger,
-                      // maxLines: null,
                     ),
                   ),
                 ),
@@ -703,5 +703,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     textEditingControllers[newIndex].addListener(() {
       _reflectTextValueForContentsView();
     });
+  }
+
+  Future<UserCredential> _googleSignin() async {
+    // Create a new provider
+    GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+    googleProvider.addScope(
+        'https://www.googleapis.com/auth/contacts.readonly');
+    googleProvider.setCustomParameters({
+      'login_hint': 'user@example.com'
+    });
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithPopup(googleProvider);
+  }
+
+  Future<void> _googleSignout() async {
+    return await FirebaseAuth.instance.signOut();
   }
 }

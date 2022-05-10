@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "372928743036",
+    "project_id": "storymaker-91db2",
+    "storage_bucket": "storymaker-91db2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372928743036:android:6afc737385d6092621ebf9",
+        "android_client_info": {
+          "package_name": "com.smsmsy.dev.story_maker_for_clip_studio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372928743036-93vf1019fpsjrfffbr61hruv6pntofkj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1gy5gYQaouE2-CXlu7xVX-XFOtxeTUH4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372928743036-93vf1019fpsjrfffbr61hruv6pntofkj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "372928743036-d8fegg4qn3h11jnjgugopgcoo25s94ja.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.smsmsy.dev.storyMakerForClipStudio"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
