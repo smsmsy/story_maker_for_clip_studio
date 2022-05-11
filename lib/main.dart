@@ -615,19 +615,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         builder: (BuildContext context) {
           return AlertDialog(
               title: const Text("ネームチェンジャー用出力プレビュー"),
-              content: Scrollbar(
-                isAlwaysShown: true,
-                child: SingleChildScrollView(
-                  child: Container(
-                    padding: const EdgeInsets.all(_edgeValueMedium),
-                    margin: const EdgeInsets.all(_edgeValueMedium),
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1.0),
-                      borderRadius: const BorderRadius.all(Radius.circular(_radiusValue)),
-                    ),
-                    child: Text(
-                      contentsForOutputToNameChanger,
-                    ),
+              content: Container(
+                padding: const EdgeInsets.all(_edgeValueMedium),
+                margin: const EdgeInsets.all(_edgeValueMedium),
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1.0),
+                  borderRadius: const BorderRadius.all(Radius.circular(_radiusValue)),
+                ),
+                child: Scrollbar(
+                  isAlwaysShown: true,
+                  child: SingleChildScrollView(
+                    child: SelectableText(contentsForOutputToNameChanger,),
                   ),
                 ),
               ),
