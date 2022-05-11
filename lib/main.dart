@@ -1,14 +1,15 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'add_person_page.dart';
+import 'pages/add_person_page.dart';
 import 'color_setting_dialog.dart';
-import 'content_class.dart';
-import 'edit_person_page.dart';
-import 'person_class.dart';
+import 'classes/content_class.dart';
+import 'pages/edit_person_page.dart';
+import 'classes/person_class.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -72,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   List<Person> persons = [];
   List<Person> personsCombinedMemo = [];
   List<Content> contents = [];
-  List<TextEditingController> textEditingControllers = [];
+  // List<TextEditingController> textEditingControllers = [];
   final Person memo = Person(name: "メモ", color: Colors.grey);
 
   late Brightness brightness;
@@ -82,6 +83,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
 
   Brightness? _brightness;
   bool isDark = false;
+
+  ScrollController scrollControllerForContentsView = ScrollController();
+  double maxExtent = 0;
 
   @override
   void initState() {
@@ -102,13 +106,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     isDark = _brightness == Brightness.dark;
     textButtonColor = isDarkMode ? Colors.white : Colors.black;
 
-    persons.add(Person(name: "サンプル 太郎", color: Colors.blue));
-    contents.add(Content(person: memo, line: "ここにセリフや心情を追加し、プロットを作成することができます。"));
+    persons.add(Person(
+      name: "サンプル 太郎",
+      color: Colors.blue,
+    ),);
+    contents.add(Content(
+      person: memo,
+      line: "",
+      controller: TextEditingController(),
+    ),);
 
     for(int i = 0; i < contents.length; i++){
-      textEditingControllers.add(TextEditingController(text: contents[i].line));
-      textEditingControllers[i].addListener(_reflectTextValueForContentsView);
+      contents[i].controller.addListener(_reflectTextValueForContentsView);
     }
+
+    // scrollControllerForContentsView = ScrollController();
+    // scrollControllerForContentsView.addListener(_reflectMaxExtentScrollControllerForContentsView);
   }
 
   @override
@@ -125,15 +138,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   void _reflectTextValueForContentsView() {
-    for(int i = 0; i < textEditingControllers.length; i++){
-      contents[i].line = textEditingControllers[i].text;
+    for(int i = 0; i < contents.length; i++){
+      contents[i].line = contents[i].controller.text;
+      print("${contents[i].person.name}'s controller was addListener");
     }
+  }
+
+  void _reflectMaxExtentScrollControllerForContentsView() {
+    maxExtent = scrollControllerForContentsView.position.maxScrollExtent;
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
-    for (var controller in textEditingControllers) {controller.dispose();}
+    for (var content in contents) {content.controller.dispose();}
+
+    scrollControllerForContentsView.dispose();
+
     super.dispose();
   }
 
@@ -314,7 +335,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                                     },
                                     onSelected: (String value) async {
                                       if(value == 'delete'){
-                                        _showAlertDialog(index);
+                                        _showPersonRemoveAlertDialog(index);
                                       } else if(value == 'edit'){
                                         _showEditPersonPage(persons[index]);
                                       }
@@ -375,15 +396,49 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                   decoration: BoxDecoration(border: Border.all(width: 2),),
                   padding: const EdgeInsets.all(_edgeValueMedium),
                   height: 500,
-                  child: ReorderableListView.builder(
-                    buildDefaultDragHandles: true,
-                    itemCount: contents.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return contentListViewOfContentsView (index);
-                    },
-                    onReorder: (int oldIndex, int newIndex) {
-                      _updateContentListForReorder(oldIndex, newIndex);
-                    },
+                  child: Stack(
+                    children: [
+                      Container(
+                        child: ReorderableListView.builder(
+                          scrollController: scrollControllerForContentsView,
+                          buildDefaultDragHandles: true,
+                          itemCount: contents.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return contentListViewOfContentsView (index);
+                          },
+                          onReorder: (int oldIndex, int newIndex) {
+                            _updateContentListForReorder(oldIndex, newIndex);
+                          },
+                        ),
+                      ),
+                      Visibility(
+                        visible: maxExtent == 0 ? false : true,
+                        child: Align(
+                          alignment: const Alignment(1, 1),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2,
+                                color: isDark ? const Color.fromARGB(128, 128, 128, 128) : const Color.fromARGB(128, 128, 128, 128),
+                              ),
+                            ),
+                            child: TextButton(
+                              onPressed: (){
+                                scrollControllerForContentsView.animateTo(
+                                  scrollControllerForContentsView.position.minScrollExtent,
+                                  duration: const Duration(seconds: 1),
+                                  curve: Curves.ease,
+                                );
+                              },
+                              child: Icon(
+                                Icons.arrow_upward,
+                                color: isDark ? const Color.fromARGB(128, 128, 128, 128) : const Color.fromARGB(128, 128, 128, 128),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -444,8 +499,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   Widget personListViewOfContentsView(int index) {
-    personsCombinedMemo = [...persons];
-    if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
+    if(persons.length == 0){
+      personsCombinedMemo = [memo];
+    } else {
+      personsCombinedMemo = [...persons];
+      if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
+    }
+
 
     return Container(
       margin: const EdgeInsets.only(right: _edgeValueSmall),
@@ -460,10 +520,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       child: TextButton(
         onPressed: () {
           setState(() {
-            contents.add(Content(person: personsCombinedMemo[index], line: ""));
+            contents.add(Content(
+              person: personsCombinedMemo[index],
+              line: "",
+              controller: TextEditingController(),
+            ));
+            contents[contents.length-1].controller.addListener(_reflectTextValueForContentsView);
           });
-          textEditingControllers.add(TextEditingController());
-          textEditingControllers[textEditingControllers.length-1].addListener(_reflectTextValueForContentsView);
+          scrollControllerForContentsView.animateTo(
+            macContext(),
+            curve: Curves.ease,
+            duration: Duration(milliseconds: _durationMilliSecond(),),
+          );
+          // textEditingControllers.add(TextEditingController());
         },
         child: Padding(
           padding: EdgeInsets.zero,
@@ -526,18 +595,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
           ),
           keyboardType: TextInputType.multiline,
           maxLines: null,
-          controller: textEditingControllers[index],
+          controller: contents[index].controller,
         ),
       ),
-
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextButton(
             onPressed: () {
               setState(() {
-                textEditingControllers[index].removeListener(_reflectTextValueForContentsView);
-                textEditingControllers.removeAt(index);
+                contents[index].controller.removeListener(_reflectTextValueForContentsView);
                 contents.removeAt(index);
               });
             },
@@ -568,14 +635,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     }
   }
 
-  Future<void> _showAlertDialog(int index) async{
+  Future<void> _showPersonRemoveAlertDialog(int index) async{
     late ResultAlertDialog ans;
     ans = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("注意"),
-            content: const Text("人物を削除しても作成済みのコンテンツは削除されません"),
+            title: const Text("人物削除について注意"),
+            content: const Text("人物を削除すると作成済みの同じ人物のコンテンツも削除されますがよろしいでしょうか？"),
             actions: <Widget>[
               SimpleDialogOption(
                 child: const Text('OK'),
@@ -592,6 +659,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     switch(ans){
       case ResultAlertDialog.ok:
         setState(() {
+          for(int i = 0; i < contents.length; i++){
+            if(persons[index] == contents[i].person){
+              contents.removeAt(i);
+              i--;
+            }
+          }
           persons.removeAt(persons.indexOf(persons[index]));
         });
         break;
@@ -694,11 +767,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     if(oldIndex < newIndex){
       newIndex -= 1;
     }
-    final TextEditingController newController = textEditingControllers.removeAt(oldIndex);
+    // final TextEditingController newController = textEditingControllers.removeAt(oldIndex);
     final Content newContent = contents.removeAt(oldIndex);
     contents.insert(newIndex, newContent);
-    textEditingControllers.insert(newIndex, newController);
-    textEditingControllers[newIndex].addListener(() {
+    // textEditingControllers.insert(newIndex, newController);
+    contents[newIndex].controller.addListener(() {
       _reflectTextValueForContentsView();
     });
   }
@@ -719,5 +792,24 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
 
   Future<void> _googleSignout() async {
     return await FirebaseAuth.instance.signOut();
+  }
+
+  int _durationMilliSecond() {
+    int res = 750;
+
+    var maxExtent = scrollControllerForContentsView.position.maxScrollExtent;
+
+      // print("-----------------------------");
+      // print("$maxExtent => log: ${log(maxExtent)}, square: ${sqrt(maxExtent)}" );
+
+    return res;
+  }
+
+  double macContext() {
+    double result;
+    scrollControllerForContentsView.position.maxScrollExtent == 0
+        ? result = scrollControllerForContentsView.position.maxScrollExtent
+        : result = scrollControllerForContentsView.position.maxScrollExtent + 62;
+    return result;
   }
 }
