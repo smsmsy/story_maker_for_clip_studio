@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   List<Person> personsCombinedMemo = [];
   List<Content> contents = [];
   List<TextEditingController> textEditingControllers = [];
-  final Person memo = Person("メモ", Colors.grey);
+  final Person memo = Person(name: "メモ", color: Colors.grey);
 
   late Brightness brightness;
   late bool isDarkMode;
@@ -102,8 +102,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     isDark = _brightness == Brightness.dark;
     textButtonColor = isDarkMode ? Colors.white : Colors.black;
 
-    persons.add(Person("サンプル 太郎", Colors.blue));
-    contents.add(Content(memo, "ここにセリフや心情を追加し、プロットを作成することができます。"));
+    persons.add(Person(name: "サンプル 太郎", color: Colors.blue));
+    contents.add(Content(person: memo, line: "ここにセリフや心情を追加し、プロットを作成することができます。"));
 
     for(int i = 0; i < contents.length; i++){
       textEditingControllers.add(TextEditingController(text: contents[i].line));
@@ -460,7 +460,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       child: TextButton(
         onPressed: () {
           setState(() {
-            contents.add(Content(personsCombinedMemo[index], ""));
+            contents.add(Content(person: personsCombinedMemo[index], line: ""));
           });
           textEditingControllers.add(TextEditingController());
           textEditingControllers[textEditingControllers.length-1].addListener(_reflectTextValueForContentsView);
