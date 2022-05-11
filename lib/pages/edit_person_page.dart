@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'color_setting_dialog.dart';
-import 'person_class.dart';
+import '../color_setting_dialog.dart';
+import '../classes/person_class.dart';
 
 class EditPersonPage extends StatefulWidget {
   const EditPersonPage({Key? key}) : super(key: key);
