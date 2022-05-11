@@ -12,7 +12,7 @@ class AddPersonPage extends StatefulWidget {
 }
 
 class _AddPersonPageState extends State<AddPersonPage> {
-  Person person = Person(name: "名称未設定", color: Colors.blueGrey);
+  Person person = Person(name: "名称未設定", color: Colors.blue);
 
   void _handlePersonName(String e) => setState(() => person.name = e);
 
