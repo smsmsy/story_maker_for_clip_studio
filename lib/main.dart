@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -54,7 +53,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -62,7 +60,6 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   static const double _radiusValue = 5.0;
@@ -140,12 +137,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   void _reflectTextValueForContentsView() {
     for(int i = 0; i < contents.length; i++){
       contents[i].line = contents[i].controller.text;
-      print("${contents[i].person.name}'s controller was addListener");
     }
-  }
-
-  void _reflectMaxExtentScrollControllerForContentsView() {
-    maxExtent = scrollControllerForContentsView.position.maxScrollExtent;
   }
 
   @override
@@ -221,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                   if(_user == null){
                     _googleSignin();
                   } else {
-                    _googleSignout();
+                    _googleAccountSignOut();
                   }
                 },
 
@@ -398,42 +390,36 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                   height: 500,
                   child: Stack(
                     children: [
-                      Container(
-                        child: ReorderableListView.builder(
-                          scrollController: scrollControllerForContentsView,
-                          buildDefaultDragHandles: true,
-                          itemCount: contents.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return contentListViewOfContentsView (index);
-                          },
-                          onReorder: (int oldIndex, int newIndex) {
-                            _updateContentListForReorder(oldIndex, newIndex);
-                          },
-                        ),
+                      ReorderableListView.builder(
+                        scrollController: scrollControllerForContentsView,
+                        buildDefaultDragHandles: true,
+                        itemCount: contents.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return contentListViewOfContentsView (index);
+                        },
+                        onReorder: (int oldIndex, int newIndex) {
+                          _updateContentListForReorder(oldIndex, newIndex);
+                        },
                       ),
-                      Visibility(
-                        visible: maxExtent == 0 ? false : true,
-                        child: Align(
-                          alignment: const Alignment(1, 1),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color: isDark ? const Color.fromARGB(128, 128, 128, 128) : const Color.fromARGB(128, 128, 128, 128),
-                              ),
+                      Align(
+                        alignment: const Alignment(1, 1),
+                        child: SizedBox(
+                          width: 40.0,
+                          child: ElevatedButton(
+                            onPressed: () => setState(() {
+                              scrollControllerForContentsView.animateTo(
+                                -scrollControllerForContentsView.position.minScrollExtent,
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.ease,
+                              );
+                            }),
+                            child: const Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 20.0,
                             ),
-                            child: TextButton(
-                              onPressed: (){
-                                scrollControllerForContentsView.animateTo(
-                                  scrollControllerForContentsView.position.minScrollExtent,
-                                  duration: const Duration(seconds: 1),
-                                  curve: Curves.ease,
-                                );
-                              },
-                              child: Icon(
-                                Icons.arrow_upward,
-                                color: isDark ? const Color.fromARGB(128, 128, 128, 128) : const Color.fromARGB(128, 128, 128, 128),
-                              ),
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all(EdgeInsets.zero),
+                              backgroundColor: MaterialStateProperty.all(const Color(0xcc5e5e5e),),
                             ),
                           ),
                         ),
@@ -499,13 +485,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   Widget personListViewOfContentsView(int index) {
-    if(persons.length == 0){
+    if(persons.isEmpty){
       personsCombinedMemo = [memo];
     } else {
       personsCombinedMemo = [...persons];
       if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
     }
-
 
     return Container(
       margin: const EdgeInsets.only(right: _edgeValueSmall),
@@ -530,7 +515,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
           scrollControllerForContentsView.animateTo(
             macContext(),
             curve: Curves.ease,
-            duration: Duration(milliseconds: _durationMilliSecond(),),
+            duration: const Duration(milliseconds: 750,),
           );
           // textEditingControllers.add(TextEditingController());
         },
@@ -726,13 +711,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   String generateContentsToTextFile() {
 
     String s = "";
-    for (int i = 0; i < contents.length; i++) {
-      if(contents[i].person == memo) continue;
-      if(contents[i].line.isEmpty) continue;
-      s += contents[i].line;
-      if(i != contents.length - 1) s += "\n\n";
+
+    for(var content in contents) {
+      if(content.person == memo) continue;
+      if(content.line.isEmpty) continue;
+
+      final lines = content.line.split("\n");
+      for (var line in lines) {
+        final trimmedLine = line.trim();
+        if (trimmedLine == "") continue;
+
+        s += trimmedLine;
+        s += "\n";
+      }
+      s += "\n";
     }
-    return s;
+    return s.trim();
   }
 
   Future<void> _showWarningLineEmpty() async {
@@ -790,19 +784,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     return await FirebaseAuth.instance.signInWithPopup(googleProvider);
   }
 
-  Future<void> _googleSignout() async {
+  Future<void> _googleAccountSignOut() async {
     return await FirebaseAuth.instance.signOut();
-  }
-
-  int _durationMilliSecond() {
-    int res = 750;
-
-    var maxExtent = scrollControllerForContentsView.position.maxScrollExtent;
-
-      // print("-----------------------------");
-      // print("$maxExtent => log: ${log(maxExtent)}, square: ${sqrt(maxExtent)}" );
-
-    return res;
   }
 
   double macContext() {
