@@ -16,7 +16,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 enum ResultAlertDialog {
-  ok, cancel,
+  ok,
+  cancel,
 }
 
 void main() async {
@@ -28,9 +29,7 @@ void main() async {
   GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
   googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-  googleProvider.setCustomParameters({
-    'login_hint': 'user@example.com'
-  });
+  googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
 
   runApp(const MyApp());
 }
@@ -42,11 +41,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(brightness: Brightness.light, fontFamily: "源柔ゴシックＰ",),
-      darkTheme: ThemeData(brightness: Brightness.dark, fontFamily: "源柔ゴシックＰ",),
-      home: const MyHomePage(title: 'まんが用プロット作成ツール',),
+      theme: ThemeData(
+        brightness: Brightness.light,
+        fontFamily: "源柔ゴシックＰ",
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        fontFamily: "源柔ゴシックＰ",
+      ),
+      home: const MyHomePage(
+        title: 'まんが用プロット作成ツール',
+      ),
       routes: <String, WidgetBuilder>{
-        '/top-page': (BuildContext context) => const MyHomePage(title: 'My Tool',),
+        '/top-page': (BuildContext context) => const MyHomePage(
+              title: 'My Tool',
+            ),
         '/add-person-page': (BuildContext context) => const AddPersonPage(),
         '/edit-person-page': (BuildContext context) => const EditPersonPage(),
       },
@@ -62,7 +71,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   static const double _radiusValue = 5.0;
   static const double _edgeValueLarge = 15.0;
   static const double _edgeValueMedium = 8.0;
@@ -71,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   List<Person> persons = [];
   List<Person> personsCombinedMemo = [];
   List<Content> contents = [];
+
   // List<TextEditingController> textEditingControllers = [];
   final Person memo = Person(name: "メモ", color: Colors.grey, hasMood: false);
 
@@ -98,18 +108,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     isDark = _brightness == Brightness.dark;
     textButtonColor = isDark ? Colors.white : Colors.black;
 
-    persons.add(Person(
-      name: "サンプル 太郎",
-      color: Colors.blue,
-      hasMood: true
-    ),);
-    contents.add(Content(
-      person: memo,
-      line: "",
-      controller: TextEditingController(),
-    ),);
+    persons.add(
+      Person(name: "サンプル 太郎", color: Colors.blue, hasMood: true),
+    );
+    contents.add(
+      Content(
+        person: memo,
+        line: "",
+        controller: TextEditingController(),
+      ),
+    );
 
-    for(int i = 0; i < contents.length; i++){
+    for (int i = 0; i < contents.length; i++) {
       contents[i].controller.addListener(_reflectTextValueForContentsView);
     }
 
@@ -131,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   void _reflectTextValueForContentsView() {
-    for(int i = 0; i < contents.length; i++){
+    for (int i = 0; i < contents.length; i++) {
       contents[i].line = contents[i].controller.text;
     }
   }
@@ -139,7 +149,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
-    for (var content in contents) {content.controller.dispose();}
+    for (var content in contents) {
+      content.controller.dispose();
+    }
 
     scrollControllerForContentsView.dispose();
 
@@ -156,66 +168,65 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       ),
       drawer: Drawer(
           child: ListView(
-            padding: EdgeInsets.fromWindowPadding(WindowPadding.zero, 8.0),
-            children: <Widget>[
-              ListTile(
-                title: Text(
-                  _user == null ? "ログインしていません" : "ようこそ、${_user?.displayName} さん",
-                ),
-              ),
-              /// TODO : 保存処理周りをFirebase Storageで実装する。
-              // ListTile(
-              //   leading: const Icon(Icons.save),
-              //   title: const Text("プロジェクトファイルを保存"),
-              //   onTap: () async {
-              //     /// TODO: ファイル保存処理は未実装のため、何かしら代替手段を考える必要がある
-              //     String? outputFile = await FilePicker.platform.saveFile(
-              //       dialogTitle: 'Please select an output file:',
-              //       fileName: 'output-file.txt',
-              //     );
-              //     if (outputFile == null) {
-              //       // User canceled the picker
-              //     }
-              //   },
-              // ),
-              // ListTile(
-              //   leading: const Icon(Icons.open_in_browser),
-              //   title: const Text("プロジェクトファイルを開く"),
-              //   onTap: () async {
-              //     final result = await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false);
-              //     if (result != null && result.files.isNotEmpty) {
-              //       final fileBytes = result.files.first.bytes;
-              //       final fileName = result.files.first.name;
-              //       /// TODO: firebase_storageでファイルをダウンロード・アップロードする処理を加えると扱えるっぽい。
-              //       print(fileName);
-              //     }
-              //   },
-              // ),
+        padding: EdgeInsets.fromWindowPadding(WindowPadding.zero, 8.0),
+        children: <Widget>[
+          ListTile(
+            title: Text(
+              _user == null ? "ログインしていません" : "ようこそ、${_user?.displayName} さん",
+            ),
+          ),
 
-              ListTile(
-                leading: Icon(
-                  _user == null ? Icons.login : Icons.logout,
-                  color: _user == null ? Colors.blue : Colors.red,
-                ),
-                title: Text(
-                  _user == null ? "Googleでログイン" : "ログアウト",
-                  style: TextStyle(
-                    color: _user == null ? Colors.blue : Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onTap: () {
-                  if(_user == null){
-                    _googleSignin();
-                  } else {
-                    _googleAccountSignOut();
-                  }
-                },
+          /// TODO : 保存処理周りをFirebase Storageで実装する。
+          // ListTile(
+          //   leading: const Icon(Icons.save),
+          //   title: const Text("プロジェクトファイルを保存"),
+          //   onTap: () async {
+          //     /// TODO: ファイル保存処理は未実装のため、何かしら代替手段を考える必要がある
+          //     String? outputFile = await FilePicker.platform.saveFile(
+          //       dialogTitle: 'Please select an output file:',
+          //       fileName: 'output-file.txt',
+          //     );
+          //     if (outputFile == null) {
+          //       // User canceled the picker
+          //     }
+          //   },
+          // ),
+          // ListTile(
+          //   leading: const Icon(Icons.open_in_browser),
+          //   title: const Text("プロジェクトファイルを開く"),
+          //   onTap: () async {
+          //     final result = await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false);
+          //     if (result != null && result.files.isNotEmpty) {
+          //       final fileBytes = result.files.first.bytes;
+          //       final fileName = result.files.first.name;
+          //       /// TODO: firebase_storageでファイルをダウンロード・アップロードする処理を加えると扱えるっぽい。
+          //       print(fileName);
+          //     }
+          //   },
+          // ),
 
+          ListTile(
+            leading: Icon(
+              _user == null ? Icons.login : Icons.logout,
+              color: _user == null ? Colors.blue : Colors.red,
+            ),
+            title: Text(
+              _user == null ? "Googleでログイン" : "ログアウト",
+              style: TextStyle(
+                color: _user == null ? Colors.blue : Colors.red,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          )
-      ),
+            ),
+            onTap: () {
+              if (_user == null) {
+                _googleSignin();
+              } else {
+                _googleAccountSignOut();
+              }
+            },
+          ),
+        ],
+      )),
       body: Scrollbar(
         isAlwaysShown: true,
         child: SingleChildScrollView(
@@ -224,17 +235,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 /// SettingsView
                 Container(
                   padding: const EdgeInsets.all(_edgeValueMedium),
-                  color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+                  color: isDark
+                      ? const Color(0x1FFFFFFF)
+                      : const Color(0x1F000000),
                   child: Theme(
-                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    data: Theme.of(context)
+                        .copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       title: Text(
                         _expandedSettingsView ? "設定を閉じる" : "設定を開く",
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                       onExpansionChanged: (changed) {
                         _expandedSettingsView = changed;
@@ -246,11 +260,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                           margin: EdgeInsets.zero,
                           width: double.infinity,
                           child: ListTile(
-                            title: const Text('■ 登場人物設定', style: TextStyle(fontSize: 20),),
+                            title: const Text(
+                              '■ 登場人物設定',
+                              style: TextStyle(fontSize: 20),
+                            ),
                             trailing: ElevatedButton(
                               onPressed: () async {
-                                final result = await Navigator.pushNamed(context, '/add-person-page');
-                                if(result is Person) { setState(() => persons.add(result)); }
+                                final result = await Navigator.pushNamed(
+                                    context, '/add-person-page');
+                                if (result is Person) {
+                                  setState(() => persons.add(result));
+                                }
                               },
                               child: const Icon(Icons.add),
                             ),
@@ -259,8 +279,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                         Container(
                           decoration: BoxDecoration(
                               border: Border.all(width: 1.0),
-                              borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
-                          ),
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(_radiusValue))),
                           margin: const EdgeInsets.only(top: 5.0),
                           height: 230.0,
                           child: ListView.builder(
@@ -268,16 +288,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                             itemBuilder: (context, index) {
                               return Container(
                                 decoration: const BoxDecoration(
-                                  border: Border(bottom: BorderSide(width: 0.5)),
+                                  border:
+                                      Border(bottom: BorderSide(width: 0.5)),
                                 ),
                                 child: ListTile(
-                                  onTap: () async{
+                                  onTap: () async {
                                     final newPerson = await Navigator.pushNamed(
                                         context, '/edit-person-page',
-                                        arguments: persons[index]
-                                    );
+                                        arguments: persons[index]);
                                     if (newPerson is Person) {
-                                      setState((){
+                                      setState(() {
                                         persons[index] = newPerson;
                                       });
                                     }
@@ -286,21 +306,33 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "No." + (index+1).toString(),
-                                        style: const TextStyle(fontWeight: FontWeight.bold,),
+                                        "No." + (index + 1).toString(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ],
                                   ),
                                   title: Row(
                                     children: <Widget>[
                                       ConstrainedBox(
-                                        constraints: const BoxConstraints(minWidth: 10.0,),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 10.0,
+                                        ),
                                         child: Text(persons[index].name),
                                       ),
-                                      const SizedBox(width: 10.0,),
+                                      const SizedBox(
+                                        width: 10.0,
+                                      ),
                                       ConstrainedBox(
-                                        constraints: const BoxConstraints(minWidth: 100.0,),
-                                        child: Text("■", style: TextStyle(color: persons[index].color),),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 100.0,
+                                        ),
+                                        child: Text(
+                                          "■",
+                                          style: TextStyle(
+                                              color: persons[index].color),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -319,9 +351,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                                       ];
                                     },
                                     onSelected: (String value) async {
-                                      if(value == 'delete'){
+                                      if (value == 'delete') {
                                         _showPersonRemoveAlertDialog(index);
-                                      } else if(value == 'edit'){
+                                      } else if (value == 'edit') {
                                         _showEditPersonPage(persons[index]);
                                       }
                                     },
@@ -337,24 +369,35 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                             children: [
                               Flexible(
                                   child: Text(
-                                    "メモの色設定：",
-                                    style: TextStyle(
-                                      color: textButtonColor,
-                                      fontSize: 20,
-                                    ),
-                                  )
+                                "メモの色設定：",
+                                style: TextStyle(
+                                  color: textButtonColor,
+                                  fontSize: 20,
+                                ),
+                              )),
+                              const SizedBox(
+                                width: 10.0,
                               ),
-                              const SizedBox(width: 10.0,),
                               SizedBox(
                                 child: TextButton(
                                   onPressed: () async {
-                                    final color = await openColorSettingDialog(context);
+                                    final color =
+                                        await openColorSettingDialog(context);
                                     _changeMemoColor(color!);
                                   },
-                                  child: Text("■", style: TextStyle(color: memo.color, fontSize: 30.0,),),
+                                  child: Text(
+                                    "■",
+                                    style: TextStyle(
+                                      color: memo.color,
+                                      fontSize: 30.0,
+                                    ),
+                                  ),
                                   style: ElevatedButton.styleFrom(
                                     padding: EdgeInsets.zero,
-                                    side: const BorderSide(color: Colors.blue, width: 2.0,),
+                                    side: const BorderSide(
+                                      color: Colors.blue,
+                                      width: 2.0,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -365,7 +408,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                     ),
                   ),
                 ),
-                const Divider(thickness: 0, height: 10.0,),
+                const Divider(
+                  thickness: 0,
+                  height: 10.0,
+                ),
 
                 /// ContentsView
                 Row(
@@ -374,8 +420,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                       width: 50,
                       alignment: Alignment.center,
                       child: isDark
-                          ? SvgPicture.asset("/images/svgs/serif_white.svg", width: 30,)
-                          : SvgPicture.asset("/images/svgs/serif_black.svg", width: 30,),
+                          ? SvgPicture.asset(
+                              "/images/svgs/serif_white.svg",
+                            )
+                          : SvgPicture.asset(
+                              "/images/svgs/serif_black.svg",
+                            ),
                     ),
                     Expanded(
                       child: Container(
@@ -384,7 +434,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: persons.length + 1,
-                          itemBuilder: (BuildContext context, int index){
+                          itemBuilder: (BuildContext context, int index) {
                             return personListViewOfContentsView(index);
                           },
                         ),
@@ -398,8 +448,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                       width: 50,
                       alignment: Alignment.center,
                       child: isDark
-                          ? SvgPicture.asset("/images/svgs//mood_white.svg", width: 30,)
-                          : SvgPicture.asset("/images/svgs//mood_black.svg", width: 30,),
+                          ? SvgPicture.asset(
+                              "/images/svgs//mood_white.svg",
+                            )
+                          : SvgPicture.asset(
+                              "/images/svgs//mood_black.svg",
+                            ),
                     ),
                     Flexible(
                       child: Container(
@@ -408,7 +462,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: persons.length + 1,
-                          itemBuilder: (BuildContext context, int index){
+                          itemBuilder: (BuildContext context, int index) {
                             return personListViewOfContentsViewForMood(index);
                           },
                         ),
@@ -416,10 +470,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                     ),
                   ],
                 ),
-                const Divider(thickness: 0, height: 10.0,),
+                const Divider(
+                  thickness: 0,
+                  height: 10.0,
+                ),
 
                 Container(
-                  decoration: BoxDecoration(border: Border.all(width: 2),),
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 2),
+                  ),
                   padding: const EdgeInsets.all(_edgeValueMedium),
                   height: 500,
                   child: Stack(
@@ -429,7 +488,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                         buildDefaultDragHandles: true,
                         itemCount: contents.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return contentListViewOfContentsView (index);
+                          return contentListViewOfContentsView(index);
                         },
                         onReorder: (int oldIndex, int newIndex) {
                           _updateContentListForReorder(oldIndex, newIndex);
@@ -442,8 +501,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                           child: ElevatedButton(
                             onPressed: () => setState(() {
                               scrollControllerForContentsView.animateTo(
-                                -scrollControllerForContentsView.position.minScrollExtent,
-                                duration: const Duration(seconds: 1, milliseconds: 500),
+                                -scrollControllerForContentsView
+                                    .position.minScrollExtent,
+                                duration: const Duration(
+                                    seconds: 1, milliseconds: 500),
                                 curve: Curves.ease,
                               );
                             }),
@@ -452,8 +513,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                               size: 20.0,
                             ),
                             style: ButtonStyle(
-                              padding: MaterialStateProperty.all(EdgeInsets.zero),
-                              backgroundColor: MaterialStateProperty.all(const Color(0xcc5e5e5e),),
+                              padding:
+                                  MaterialStateProperty.all(EdgeInsets.zero),
+                              backgroundColor: MaterialStateProperty.all(
+                                const Color(0xcc5e5e5e),
+                              ),
                             ),
                           ),
                         ),
@@ -476,38 +540,49 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                       child: ConstrainedBox(
                           constraints: const BoxConstraints(),
                           child: ElevatedButton(
-                            child: const Text("読む用に出力", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+                            child: const Text(
+                              "読む用に出力",
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
                             onPressed: () async {
-                              if(contents.any((content) => content.line == "")){
-                                ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                                if(selection == ResultAlertDialog.ok) {
+                              if (contents
+                                  .any((content) => content.line == "")) {
+                                ResultAlertDialog selection =
+                                    await _showWarningLineEmpty()
+                                        as ResultAlertDialog;
+                                if (selection == ResultAlertDialog.ok) {
                                   _outputForReading(context);
                                 }
                               } else {
                                 _outputForReading(context);
                               }
                             },
-                          )
-                      ),
+                          )),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ConstrainedBox(
                           constraints: const BoxConstraints(),
                           child: ElevatedButton(
-                            child: const Text("クリスタ用に出力", style: TextStyle(fontSize: 15),),
+                            child: const Text(
+                              "クリスタ用に出力",
+                              style: TextStyle(fontSize: 15),
+                            ),
                             onPressed: () async {
-                              if(contents.any((content) => content.line == "")){
-                                ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                                if(selection == ResultAlertDialog.ok){
+                              if (contents
+                                  .any((content) => content.line == "")) {
+                                ResultAlertDialog selection =
+                                    await _showWarningLineEmpty()
+                                        as ResultAlertDialog;
+                                if (selection == ResultAlertDialog.ok) {
                                   _outputForNameChanger(context);
                                 }
                               } else {
                                 _outputForNameChanger(context);
                               }
                             },
-                          )
-                      ),
+                          )),
                     ),
                   ],
                 ),
@@ -520,14 +595,22 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   Widget _showIconForSerifOrMood(int index) {
-    if(isDark){
+    if (isDark) {
       return contents[index].person.hasMood
-          ? SvgPicture.asset("/images/svgs/mood_white.svg", width: 30, )
-          : SvgPicture.asset("/images/svgs/serif_white.svg", width: 30,);
+          ? SvgPicture.asset(
+              "/images/svgs/mood_white.svg",
+            )
+          : SvgPicture.asset(
+              "/images/svgs/serif_white.svg",
+            );
     } else {
       return contents[index].person.hasMood
-          ? SvgPicture.asset("/images/svgs/mood_black.svg", width: 30,)
-          : SvgPicture.asset("/images/svgs/serif_black.svg", width: 30,);
+          ? SvgPicture.asset(
+              "/images/svgs/mood_black.svg",
+            )
+          : SvgPicture.asset(
+              "/images/svgs/serif_black.svg",
+            );
     }
   }
 
@@ -542,12 +625,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
             width: 2.0,
             color: personsCombinedMemo[index].color,
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
-      ),
+          borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))),
       child: TextButton(
         onPressed: () {
           setState(() {
-            contents.add( Content(
+            contents.add(Content(
               person: Person(
                 name: personsCombinedMemo[index].name,
                 color: personsCombinedMemo[index].color,
@@ -556,12 +638,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
               line: "",
               controller: TextEditingController(),
             ));
-            contents[contents.length-1].controller.addListener(_reflectTextValueForContentsView);
+            contents[contents.length - 1]
+                .controller
+                .addListener(_reflectTextValueForContentsView);
           });
           scrollControllerForContentsView.animateTo(
             macContext(),
             curve: Curves.ease,
-            duration: const Duration(milliseconds: 750,),
+            duration: const Duration(
+              milliseconds: 750,
+            ),
           );
           // textEditingControllers.add(TextEditingController());
         },
@@ -588,7 +674,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       width: 100,
     );
 
-    if(personsCombinedMemo[index].hasMood){
+    if (personsCombinedMemo[index].hasMood) {
       widget = Container(
         margin: const EdgeInsets.only(right: _edgeValueSmall),
         width: 100,
@@ -597,8 +683,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
               width: 2.0,
               color: personsCombinedMemo[index].color,
             ),
-            borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
-        ),
+            borderRadius:
+                const BorderRadius.all(Radius.circular(_radiusValue))),
         child: TextButton(
           onPressed: () {
             setState(() {
@@ -611,12 +697,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                 line: "",
                 controller: TextEditingController(),
               ));
-              contents[contents.length-1].controller.addListener(_reflectTextValueForContentsView);
+              contents[contents.length - 1]
+                  .controller
+                  .addListener(_reflectTextValueForContentsView);
             });
             scrollControllerForContentsView.animateTo(
               macContext(),
               curve: Curves.ease,
-              duration: const Duration(milliseconds: 750,),
+              duration: const Duration(
+                milliseconds: 750,
+              ),
             );
             // textEditingControllers.add(TextEditingController());
           },
@@ -639,11 +729,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   void setCombinedPersons() {
-    if(persons.isEmpty){
+    if (persons.isEmpty) {
       personsCombinedMemo = [memo];
     } else {
       personsCombinedMemo = [...persons];
-      if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
+      if (personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
     }
   }
 
@@ -655,7 +745,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "No." + (index+1).toString(),
+            "No." + (index + 1).toString(),
             style: TextStyle(
               color: contents[index].person.color,
               fontWeight: FontWeight.bold,
@@ -707,7 +797,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
           TextButton(
             onPressed: () {
               setState(() {
-                contents[index].controller.removeListener(_reflectTextValueForContentsView);
+                contents[index]
+                    .controller
+                    .removeListener(_reflectTextValueForContentsView);
                 contents.removeAt(index);
               });
             },
@@ -727,18 +819,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         barrierDismissible: false,
         builder: (context) {
           return ColorSettingDialog(memo.color);
-        }
-    );
+        });
   }
 
   Future<void> _showEditPersonPage(Person person) async {
-    final newPerson = await Navigator.pushNamed(context, '/edit-person-page', arguments: person);
+    final newPerson = await Navigator.pushNamed(context, '/edit-person-page',
+        arguments: person);
     if (newPerson is Person) {
-      setState(()=> persons[persons.indexOf(person)] = newPerson);
+      setState(() => persons[persons.indexOf(person)] = newPerson);
     }
   }
 
-  Future<void> _showPersonRemoveAlertDialog(int index) async{
+  Future<void> _showPersonRemoveAlertDialog(int index) async {
     late ResultAlertDialog ans;
     ans = await showDialog(
         context: context,
@@ -749,21 +841,24 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
             actions: <Widget>[
               SimpleDialogOption(
                 child: const Text('OK'),
-                onPressed: (){Navigator.pop(context, ResultAlertDialog.ok);},
+                onPressed: () {
+                  Navigator.pop(context, ResultAlertDialog.ok);
+                },
               ),
               SimpleDialogOption(
                 child: const Text('キャンセル'),
-                onPressed: (){Navigator.pop(context, ResultAlertDialog.cancel);},
+                onPressed: () {
+                  Navigator.pop(context, ResultAlertDialog.cancel);
+                },
               ),
             ],
           );
-        }
-    );
-    switch(ans){
+        });
+    switch (ans) {
       case ResultAlertDialog.ok:
         setState(() {
-          for(int i = 0; i < contents.length; i++){
-            if(persons[index].name == contents[i].person.name){
+          for (int i = 0; i < contents.length; i++) {
+            if (persons[index].name == contents[i].person.name) {
               contents.removeAt(i);
               i--;
             }
@@ -778,11 +873,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
 
   void _changeMemoColor(Color color) => setState(() => memo.color = color);
 
-  void _outputForReading(BuildContext context) {
+  void _outputForReading(BuildContext context) {}
 
-  }
-
-  Future<void> _outputForNameChanger(BuildContext context) async{
+  Future<void> _outputForNameChanger(BuildContext context) async {
     String contentsForOutputToNameChanger = "";
     contentsForOutputToNameChanger = generateContentsToTextFile();
 
@@ -796,43 +889,42 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                 margin: const EdgeInsets.all(_edgeValueMedium),
                 decoration: BoxDecoration(
                   border: Border.all(width: 1.0),
-                  borderRadius: const BorderRadius.all(Radius.circular(_radiusValue)),
+                  borderRadius:
+                      const BorderRadius.all(Radius.circular(_radiusValue)),
                 ),
                 child: Scrollbar(
                   isAlwaysShown: true,
                   child: SingleChildScrollView(
-                    child: SelectableText(contentsForOutputToNameChanger,),
+                    child: SelectableText(
+                      contentsForOutputToNameChanger,
+                    ),
                   ),
                 ),
               ),
               actions: <Widget>[
                 ElevatedButton(
                     child: const Text("クリップボードにコピー"),
-                    onPressed: () async{
-                      final data = ClipboardData(text: contentsForOutputToNameChanger);
+                    onPressed: () async {
+                      final data =
+                          ClipboardData(text: contentsForOutputToNameChanger);
                       await Clipboard.setData(data);
-                    }
-                ),
+                    }),
                 TextButton(
                     child: const Text("閉じる"),
                     onPressed: () {
                       contentsForOutputToNameChanger = "";
                       Navigator.of(context).pop();
-                    }
-                ),
-              ]
-          );
-        }
-    );
+                    }),
+              ]);
+        });
   }
 
   String generateContentsToTextFile() {
-
     String s = "";
 
-    for(var content in contents) {
-      if(content.person == memo) continue;
-      if(content.line.isEmpty) continue;
+    for (var content in contents) {
+      if (content.person == memo) continue;
+      if (content.line.isEmpty) continue;
 
       final lines = content.line.split("\n");
       for (var line in lines) {
@@ -860,23 +952,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                       child: const Text("OK"),
                       onPressed: () {
                         Navigator.of(context).pop(ResultAlertDialog.ok);
-                      }
-                  ),
+                      }),
                   TextButton(
                       child: const Text("キャンセル"),
                       onPressed: () {
                         Navigator.of(context).pop(ResultAlertDialog.cancel);
-                      }
-                  )
-                ]
-            ),
+                      })
+                ]),
           );
-        }
-    );
+        });
   }
 
   void _updateContentListForReorder(int oldIndex, int newIndex) {
-    if(oldIndex < newIndex){
+    if (oldIndex < newIndex) {
       newIndex -= 1;
     }
     // final TextEditingController newController = textEditingControllers.removeAt(oldIndex);
@@ -892,11 +980,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     // Create a new provider
     GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-    googleProvider.addScope(
-        'https://www.googleapis.com/auth/contacts.readonly');
-    googleProvider.setCustomParameters({
-      'login_hint': 'user@example.com'
-    });
+    googleProvider
+        .addScope('https://www.googleapis.com/auth/contacts.readonly');
+    googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
 
     // Once signed in, return the UserCredential
     return await FirebaseAuth.instance.signInWithPopup(googleProvider);
@@ -910,9 +996,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     double result;
     scrollControllerForContentsView.position.maxScrollExtent == 0
         ? result = scrollControllerForContentsView.position.maxScrollExtent
-        : result = scrollControllerForContentsView.position.maxScrollExtent + 62;
+        : result =
+            scrollControllerForContentsView.position.maxScrollExtent + 62;
     return result;
   }
-
-
 }
