@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'pages/add_person_page.dart';
@@ -13,6 +12,8 @@ import 'classes/person_class.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:flutter_svg/flutter_svg.dart';
 
 enum ResultAlertDialog {
   ok, cancel,
@@ -71,10 +72,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   List<Person> personsCombinedMemo = [];
   List<Content> contents = [];
   // List<TextEditingController> textEditingControllers = [];
-  final Person memo = Person(name: "メモ", color: Colors.grey);
+  final Person memo = Person(name: "メモ", color: Colors.grey, hasMood: false);
 
-  late Brightness brightness;
-  late bool isDarkMode;
   late Color textButtonColor;
   bool _expandedSettingsView = false;
 
@@ -94,18 +93,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       });
     });
 
-    brightness = SchedulerBinding.instance!.window.platformBrightness;
-    isDarkMode = brightness == Brightness.dark;
-
     WidgetsBinding.instance?.addObserver(this);
     _brightness = WidgetsBinding.instance?.window.platformBrightness;
-    _brightness = WidgetsBinding.instance?.window.platformBrightness;
     isDark = _brightness == Brightness.dark;
-    textButtonColor = isDarkMode ? Colors.white : Colors.black;
+    textButtonColor = isDark ? Colors.white : Colors.black;
 
     persons.add(Person(
       name: "サンプル 太郎",
       color: Colors.blue,
+      hasMood: true
     ),);
     contents.add(Content(
       person: memo,
@@ -149,7 +145,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
 
     super.dispose();
   }
-
 
   User? _user;
 
@@ -229,19 +224,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 /// SettingsView
                 Container(
                   padding: const EdgeInsets.all(_edgeValueMedium),
-                  color: isDarkMode ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+                  color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
                   child: Theme(
                     data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       title: Text(
                         _expandedSettingsView ? "設定を閉じる" : "設定を開く",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                       onExpansionChanged: (changed) {
                         _expandedSettingsView = changed;
@@ -372,18 +365,59 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                     ),
                   ),
                 ),
+                const Divider(thickness: 0, height: 10.0,),
 
-                Container(
-                  margin: const EdgeInsets.only(bottom: _edgeValueMedium, top: _edgeValueLarge),
-                  height: 50.0,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: persons.length + 1,
-                    itemBuilder: (BuildContext context, int index){
-                      return personListViewOfContentsView(index);
-                    },
-                  ),
+                /// ContentsView
+                Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      alignment: Alignment.center,
+                      child: isDark
+                          ? SvgPicture.asset("/images/svgs/serif.svg", color: Colors.white, width: 30,)
+                          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.black, width: 30,),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.all(_edgeValueSmall),
+                        height: 50.0,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: persons.length + 1,
+                          itemBuilder: (BuildContext context, int index){
+                            return personListViewOfContentsView(index);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      alignment: Alignment.center,
+                      child: isDark
+                          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.white, width: 30,)
+                          : SvgPicture.asset("/images/svgs/mood.svg", color: Colors.black, width: 30,),
+                    ),
+                    Flexible(
+                      child: Container(
+                        margin: const EdgeInsets.all(_edgeValueSmall),
+                        height: 50.0,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: persons.length + 1,
+                          itemBuilder: (BuildContext context, int index){
+                            return personListViewOfContentsViewForMood(index);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(thickness: 0, height: 10.0,),
+
                 Container(
                   decoration: BoxDecoration(border: Border.all(width: 2),),
                   padding: const EdgeInsets.all(_edgeValueMedium),
@@ -409,7 +443,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                             onPressed: () => setState(() {
                               scrollControllerForContentsView.animateTo(
                                 -scrollControllerForContentsView.position.minScrollExtent,
-                                duration: const Duration(seconds: 1),
+                                duration: const Duration(seconds: 1, milliseconds: 500),
                                 curve: Curves.ease,
                               );
                             }),
@@ -427,11 +461,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                     ],
                   ),
                 ),
-
                 const Divider(
                   thickness: 1.0,
                   height: 20.0,
                 ),
+
+                /// OutputView
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,7 +476,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                       child: ConstrainedBox(
                           constraints: const BoxConstraints(),
                           child: ElevatedButton(
-                            child: const Text("読む用に出力", style: TextStyle(fontSize: 15),),
+                            child: const Text("読む用に出力", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
                             onPressed: () async {
                               if(contents.any((content) => content.line == "")){
                                 ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
@@ -485,12 +520,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
   }
 
   Widget personListViewOfContentsView(int index) {
-    if(persons.isEmpty){
-      personsCombinedMemo = [memo];
-    } else {
-      personsCombinedMemo = [...persons];
-      if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
-    }
+    setCombinedPersons();
 
     return Container(
       margin: const EdgeInsets.only(right: _edgeValueSmall),
@@ -505,8 +535,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       child: TextButton(
         onPressed: () {
           setState(() {
-            contents.add(Content(
-              person: personsCombinedMemo[index],
+            contents.add( Content(
+              person: Person(
+                name: personsCombinedMemo[index].name,
+                color: personsCombinedMemo[index].color,
+                hasMood: false,
+              ),
               line: "",
               controller: TextEditingController(),
             ));
@@ -534,10 +568,77 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     );
   }
 
+  Widget personListViewOfContentsViewForMood(int index) {
+    setCombinedPersons();
+
+    Widget widget = Container(
+      margin: const EdgeInsets.only(right: _edgeValueSmall),
+      width: 100,
+    );
+
+    if(personsCombinedMemo[index].hasMood){
+      widget = Container(
+        margin: const EdgeInsets.only(right: _edgeValueSmall),
+        width: 100,
+        decoration: BoxDecoration(
+            border: Border.all(
+              width: 2.0,
+              color: personsCombinedMemo[index].color,
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))
+        ),
+        child: TextButton(
+          onPressed: () {
+            setState(() {
+              contents.add(Content(
+                person: Person(
+                  name: personsCombinedMemo[index].name,
+                  color: personsCombinedMemo[index].color,
+                  hasMood: true,
+                ),
+                line: "",
+                controller: TextEditingController(),
+              ));
+              contents[contents.length-1].controller.addListener(_reflectTextValueForContentsView);
+            });
+            scrollControllerForContentsView.animateTo(
+              macContext(),
+              curve: Curves.ease,
+              duration: const Duration(milliseconds: 750,),
+            );
+            // textEditingControllers.add(TextEditingController());
+          },
+          child: Padding(
+            padding: EdgeInsets.zero,
+            child: Text(
+              personsCombinedMemo[index].name,
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontSize: 12,
+                color: textButtonColor,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widget;
+  }
+
+  void setCombinedPersons() {
+    if(persons.isEmpty){
+      personsCombinedMemo = [memo];
+    } else {
+      personsCombinedMemo = [...persons];
+      if(personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
+    }
+  }
+
   Widget contentListViewOfContentsView(int index) {
     return ListTile(
       key: Key('$index'),
-      contentPadding: const EdgeInsets.only(left: 20.0, right: _edgeValueLarge),
+      contentPadding: const EdgeInsets.only(left: 20.0, right: 15),
       leading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -554,6 +655,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         offset: const Offset(10, 0),
         child: TextFormField(
           decoration: InputDecoration(
+            prefixIcon: Padding(
+              padding: EdgeInsets.all(_edgeValueMedium),
+              child: _showIconForSerifOrMood(index),
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_radiusValue),
               borderSide: BorderSide(
@@ -584,6 +689,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         ),
       ),
       trailing: Column(
+        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TextButton(
@@ -645,7 +751,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
       case ResultAlertDialog.ok:
         setState(() {
           for(int i = 0; i < contents.length; i++){
-            if(persons[index] == contents[i].person){
+            if(persons[index].name == contents[i].person.name){
               contents.removeAt(i);
               i--;
             }
@@ -794,5 +900,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         ? result = scrollControllerForContentsView.position.maxScrollExtent
         : result = scrollControllerForContentsView.position.maxScrollExtent + 62;
     return result;
+  }
+
+  Widget _showIconForSerifOrMood(int index) {
+    if(isDark){
+      return contents[index].person.hasMood
+          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.white, width: 30, )
+          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.white, width: 30,);
+    } else {
+      return contents[index].person.hasMood
+          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.black, width: 30,)
+          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.black, width: 30,);
+    }
   }
 }

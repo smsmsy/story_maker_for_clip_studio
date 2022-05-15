@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../color_setting_dialog.dart';
@@ -12,14 +11,17 @@ class AddPersonPage extends StatefulWidget {
 }
 
 class _AddPersonPageState extends State<AddPersonPage> {
-  Person person = Person(name: "名称未設定", color: Colors.blue);
+  Person person = Person(name: "名称未設定", color: Colors.blue, hasMood: false);
 
   void _handlePersonName(String e) => setState(() => person.name = e);
 
   void _changeColor(Color color) => setState(() => person.color = color);
 
   bool _isSelected = false;
-  void _handleCheckBox(bool? value) => setState(()  => _isSelected = value!);
+  void _handleCheckBox(bool? value) => setState(() {
+    _isSelected = value!;
+    person.hasMood = _isSelected;
+  });
 
   @override
   Widget build(BuildContext context){
@@ -87,8 +89,7 @@ class _AddPersonPageState extends State<AddPersonPage> {
                         value: _isSelected,
                         onChanged: _handleCheckBox,
                       ),
-                      /// TODO: 「台詞と心情を分けて作成する」機能は未実装。
-                      const Text("：セリフと心情を分けて作成する（未実装）",),
+                      const Text("：セリフと心情を分けて作成する",),
                     ],
                   ),
                 ),

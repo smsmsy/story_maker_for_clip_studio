@@ -12,10 +12,20 @@ class EditPersonPage extends StatefulWidget {
 
 class _EditPersonPageState extends State<EditPersonPage> {
   late Person person;
+  late bool _isSelected;
+
+  void _handlePersonName(String name) => setState(() => person.name = name);
+  void _changeColor(Color color) => setState(() => person.color = color);
+
+  void _handleCheckBox(bool? value) => setState(() {
+    _isSelected = value!;
+    person.hasMood = _isSelected;
+  });
 
   @override
   void didChangeDependencies() {
     person = ModalRoute.of(context)?.settings.arguments as Person;
+    _isSelected = person.hasMood;
   }
 
   @override
@@ -66,6 +76,20 @@ class _EditPersonPageState extends State<EditPersonPage> {
                     ],
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        activeColor: Colors.lightGreen,
+                        value: _isSelected,
+                        onChanged: _handleCheckBox,
+                      ),
+                      const Text("：セリフと心情を分けて作成する",),
+                    ],
+                  ),
+                ),
                 /// ----- 作成ボタン -----
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -84,9 +108,6 @@ class _EditPersonPageState extends State<EditPersonPage> {
     );
   }
 
-
-  void _handlePersonName(String name) => setState(() => person.name = name);
-  void _changeColor(Color color) => setState(() => person.color = color);
 
   Future<Color?> openColorSettingDialog(BuildContext context) {
     return showDialog<Color>(
