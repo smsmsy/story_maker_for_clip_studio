@@ -398,8 +398,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
                       width: 50,
                       alignment: Alignment.center,
                       child: isDark
-                          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.white, width: 30,)
-                          : SvgPicture.asset("/images/svgs/mood.svg", color: Colors.black, width: 30,),
+                          ? SvgPicture.asset("/images/svgs//mood.svg", color: Colors.white, width: 30,)
+                          : SvgPicture.asset("/images/svgs//mood.svg", color: Colors.black, width: 30,),
                     ),
                     Flexible(
                       child: Container(
@@ -517,6 +517,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
         ),
       ),
     );
+  }
+
+  Widget _showIconForSerifOrMood(int index) {
+    if(isDark){
+      return contents[index].person.hasMood
+          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.white, width: 30, )
+          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.white, width: 30,);
+    } else {
+      return contents[index].person.hasMood
+          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.black, width: 30,)
+          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.black, width: 30,);
+    }
   }
 
   Widget personListViewOfContentsView(int index) {
@@ -902,15 +914,5 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver  {
     return result;
   }
 
-  Widget _showIconForSerifOrMood(int index) {
-    if(isDark){
-      return contents[index].person.hasMood
-          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.white, width: 30, )
-          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.white, width: 30,);
-    } else {
-      return contents[index].person.hasMood
-          ? SvgPicture.asset("/images/svgs/mood.svg", color: Colors.black, width: 30,)
-          : SvgPicture.asset("/images/svgs/serif.svg", color: Colors.black, width: 30,);
-    }
-  }
+
 }

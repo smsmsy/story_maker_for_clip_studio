@@ -39,8 +39,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/svgs/mood.svg
-    - assets/images/svgs/serif.svg
+    - assets/
 
   fonts:
     - family: 源柔ゴシックＰ
