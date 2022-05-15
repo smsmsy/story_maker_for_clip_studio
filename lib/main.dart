@@ -419,13 +419,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     Container(
                       width: 50,
                       alignment: Alignment.center,
-                      child: isDark
-                          ? SvgPicture.asset(
-                              "/images/svgs/serif_white.svg",
-                            )
-                          : SvgPicture.asset(
-                              "/images/svgs/serif_black.svg",
-                            ),
+                      child: const Text("セリフ"),
+                      // isDark
+                      //     ? SvgPicture.asset(
+                      //         "/images/svgs/serif_white.svg", width: 30.0
+                      //       )
+                      //     : SvgPicture.asset(
+                      //         "/images/svgs/serif_black.svg", width: 30.0
+                      //       ),
                     ),
                     Expanded(
                       child: Container(
@@ -447,13 +448,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     Container(
                       width: 50,
                       alignment: Alignment.center,
-                      child: isDark
-                          ? SvgPicture.asset(
-                              "/images/svgs//mood_white.svg",
-                            )
-                          : SvgPicture.asset(
-                              "/images/svgs//mood_black.svg",
-                            ),
+                      child: const Text("心情"),
+                      // isDark
+                      //     ? SvgPicture.asset(
+                      //         "/images/svgs//mood_white.svg", width: 30.0
+                      //       )
+                      //     : SvgPicture.asset(
+                      //         "/images/svgs//mood_black.svg", width: 30.0
+                      //       ),
                     ),
                     Flexible(
                       child: Container(
@@ -595,23 +597,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Widget _showIconForSerifOrMood(int index) {
-    if (isDark) {
-      return contents[index].person.hasMood
-          ? SvgPicture.asset(
-              "/images/svgs/mood_white.svg",
-            )
-          : SvgPicture.asset(
-              "/images/svgs/serif_white.svg",
-            );
+    if(contents[index].person.hasMood) {
+      return const Text("心情");
     } else {
-      return contents[index].person.hasMood
-          ? SvgPicture.asset(
-              "/images/svgs/mood_black.svg",
-            )
-          : SvgPicture.asset(
-              "/images/svgs/serif_black.svg",
-            );
+      return const Text("セリフ");
     }
+    // if (isDark) {
+    //   return contents[index].person.hasMood
+    //       ? SvgPicture.asset(
+    //           "/images/svgs/mood_white.svg", width: 30.0
+    //         )
+    //       : SvgPicture.asset(
+    //           "/images/svgs/serif_white.svg", width: 30.0
+    //         );
+    // } else {
+    //   return contents[index].person.hasMood
+    //       ? SvgPicture.asset(
+    //           "/images/svgs/mood_black.svg", width: 30.0
+    //         )
+    //       : SvgPicture.asset(
+    //           "/images/svgs/serif_black.svg", width: 30.0
+    //         );
+    // }
   }
 
   Widget personListViewOfContentsView(int index) {
@@ -758,7 +765,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: TextFormField(
           decoration: InputDecoration(
             prefixIcon: Padding(
-              padding: EdgeInsets.all(_edgeValueMedium),
+              padding: const EdgeInsets.all(_edgeValueMedium),
               child: _showIconForSerifOrMood(index),
             ),
             focusedBorder: OutlineInputBorder(
