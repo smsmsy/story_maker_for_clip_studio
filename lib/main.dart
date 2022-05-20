@@ -288,8 +288,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             itemBuilder: (context, index) {
                               return Container(
                                 decoration: const BoxDecoration(
-                                  border:
-                                      Border(bottom: BorderSide(width: 0.5)),
+                                  border: Border(bottom: BorderSide(width: 0.5)),
                                 ),
                                 child: ListTile(
                                   onTap: () async {
@@ -368,21 +367,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           child: Row(
                             children: [
                               Flexible(
-                                  child: Text(
-                                "メモの色設定：",
-                                style: TextStyle(
-                                  color: textButtonColor,
-                                  fontSize: 20,
+                                child: Text( "メモの色設定：",
+                                  style: TextStyle(color: textButtonColor, fontSize: 20,),
                                 ),
-                              )),
+                              ),
                               const SizedBox(
                                 width: 10.0,
                               ),
                               SizedBox(
                                 child: TextButton(
                                   onPressed: () async {
-                                    final color =
-                                        await openColorSettingDialog(context);
+                                    final color = await openColorSettingDialog(context);
                                     _changeMemoColor(color!);
                                   },
                                   child: Text(
@@ -419,14 +414,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     Container(
                       width: 50,
                       alignment: Alignment.center,
-                      child: const Text("セリフ"),
-                      // isDark
-                      //     ? SvgPicture.asset(
-                      //         "/images/svgs/serif_white.svg", width: 30.0
-                      //       )
-                      //     : SvgPicture.asset(
-                      //         "/images/svgs/serif_black.svg", width: 30.0
-                      //       ),
+                      child: const Text("💬", style: TextStyle(fontSize: 25),),
                     ),
                     Expanded(
                       child: Container(
@@ -448,14 +436,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     Container(
                       width: 50,
                       alignment: Alignment.center,
-                      child: const Text("心情"),
-                      // isDark
-                      //     ? SvgPicture.asset(
-                      //         "/images/svgs//mood_white.svg", width: 30.0
-                      //       )
-                      //     : SvgPicture.asset(
-                      //         "/images/svgs//mood_black.svg", width: 30.0
-                      //       ),
+                      child: const Text("💭", style: TextStyle(fontSize: 25),),
                     ),
                     Flexible(
                       child: Container(
@@ -515,8 +496,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                               size: 20.0,
                             ),
                             style: ButtonStyle(
-                              padding:
-                                  MaterialStateProperty.all(EdgeInsets.zero),
+                              padding: MaterialStateProperty.all(EdgeInsets.zero),
                               backgroundColor: MaterialStateProperty.all(
                                 const Color(0xcc5e5e5e),
                               ),
@@ -598,27 +578,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Widget _showIconForSerifOrMood(int index) {
     if(contents[index].person.hasMood) {
-      return const Text("心情");
+      return const Text("💭", style: TextStyle(fontSize: 25),);
     } else {
-      return const Text("セリフ");
+      return const Text("💬", style: TextStyle(fontSize: 25),);
     }
-    // if (isDark) {
-    //   return contents[index].person.hasMood
-    //       ? SvgPicture.asset(
-    //           "/images/svgs/mood_white.svg", width: 30.0
-    //         )
-    //       : SvgPicture.asset(
-    //           "/images/svgs/serif_white.svg", width: 30.0
-    //         );
-    // } else {
-    //   return contents[index].person.hasMood
-    //       ? SvgPicture.asset(
-    //           "/images/svgs/mood_black.svg", width: 30.0
-    //         )
-    //       : SvgPicture.asset(
-    //           "/images/svgs/serif_black.svg", width: 30.0
-    //         );
-    // }
   }
 
   Widget personListViewOfContentsView(int index) {
