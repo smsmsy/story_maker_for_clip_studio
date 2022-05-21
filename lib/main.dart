@@ -681,68 +681,138 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Widget contentListViewOfContentsView(int index) {
-    return ListTile(
-      key: Key('$index'),
-      contentPadding: const EdgeInsets.only(left: 20.0, right: 15),
-      leading: Text(
-        "No." + (index + 1).toString(),
-        style: TextStyle(
-          color: contents[index].person.color,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      title: Transform.translate(
-        offset: const Offset(10, 0),
-        child: TextFormField(
-          decoration: InputDecoration(
-            prefixIcon: Padding(
-              padding: const EdgeInsets.all(_edgeValueMedium),
-              child: _showIconForSerifOrMood(index),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(_radiusValue),
-              borderSide: BorderSide(
-                color: contents[index].person.color,
-                width: 2.0,
-              ),
-            ),
-            labelStyle: TextStyle(
-              fontSize: 12,
+    return Row(
+      key: Key('${index}'),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(_edgeValueMedium),
+          child: Text(
+            "No." + (index + 1).toString(),
+            style: TextStyle(
               color: contents[index].person.color,
-            ),
-            labelText: contents[index].person.name,
-            floatingLabelStyle: TextStyle(
-              fontSize: 16,
-              color: contents[index].person.color,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(_radiusValue),
-              borderSide: BorderSide(
-                color: contents[index].person.color,
-                width: 1.0,
-              ),
+              fontWeight: FontWeight.bold,
             ),
           ),
-          keyboardType: TextInputType.multiline,
-          maxLines: null,
-          controller: contents[index].controller,
         ),
-      ),
-      trailing: TextButton(
-        onPressed: () {
-          setState(() {
-            contents[index]
-                .controller
-                .removeListener(_reflectTextValueForContentsView);
-            contents.removeAt(index);
-          });
-        },
-        child: Icon(
-          Icons.remove_circle_outline_rounded,
-          color: Colors.red[400],
+
+        Expanded(
+          child: Transform.translate(
+            offset: const Offset(10, 0),
+            child: TextFormField(
+              decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(_edgeValueMedium),
+                  child: _showIconForSerifOrMood(index),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(_radiusValue),
+                  borderSide: BorderSide(
+                    color: contents[index].person.color,
+                    width: 2.0,
+                  ),
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 12,
+                  color: contents[index].person.color,
+                ),
+                labelText: contents[index].person.name,
+                floatingLabelStyle: TextStyle(
+                  fontSize: 16,
+                  color: contents[index].person.color,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(_radiusValue),
+                  borderSide: BorderSide(
+                    color: contents[index].person.color,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              controller: contents[index].controller,
+            ),
+          ),
         ),
-      ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              contents[index]
+                  .controller
+                  .removeListener(_reflectTextValueForContentsView);
+              contents.removeAt(index);
+            });
+          },
+          child: Icon(
+            Icons.remove_circle_outline_rounded,
+            color: Colors.red[400],
+          ),
+        ),
+        const SizedBox(width: 20,)
+      ],
     );
+    //   ListTile(
+    //   key: Key('$index'),
+    //   contentPadding: const EdgeInsets.only(left: 20.0, right: 15),
+    //   leading: Text(
+    //     "No." + (index + 1).toString(),
+    //     style: TextStyle(
+    //       color: contents[index].person.color,
+    //       fontWeight: FontWeight.bold,
+    //     ),
+    //   ),
+    //   title: Transform.translate(
+    //     offset: const Offset(10, 0),
+    //     child: TextFormField(
+    //       decoration: InputDecoration(
+    //         prefixIcon: Padding(
+    //           padding: const EdgeInsets.all(_edgeValueMedium),
+    //           child: _showIconForSerifOrMood(index),
+    //         ),
+    //         focusedBorder: OutlineInputBorder(
+    //           borderRadius: BorderRadius.circular(_radiusValue),
+    //           borderSide: BorderSide(
+    //             color: contents[index].person.color,
+    //             width: 2.0,
+    //           ),
+    //         ),
+    //         labelStyle: TextStyle(
+    //           fontSize: 12,
+    //           color: contents[index].person.color,
+    //         ),
+    //         labelText: contents[index].person.name,
+    //         floatingLabelStyle: TextStyle(
+    //           fontSize: 16,
+    //           color: contents[index].person.color,
+    //         ),
+    //         enabledBorder: OutlineInputBorder(
+    //           borderRadius: BorderRadius.circular(_radiusValue),
+    //           borderSide: BorderSide(
+    //             color: contents[index].person.color,
+    //             width: 1.0,
+    //           ),
+    //         ),
+    //       ),
+    //       keyboardType: TextInputType.multiline,
+    //       maxLines: null,
+    //       controller: contents[index].controller,
+    //     ),
+    //   ),
+    //   trailing: TextButton(
+    //     onPressed: () {
+    //       setState(() {
+    //         contents[index]
+    //             .controller
+    //             .removeListener(_reflectTextValueForContentsView);
+    //         contents.removeAt(index);
+    //       });
+    //     },
+    //     child: Icon(
+    //       Icons.remove_circle_outline_rounded,
+    //       color: Colors.red[400],
+    //     ),
+    //   ),
+    // );
   }
 
   Future<Color?> openColorSettingDialog(BuildContext context) {
