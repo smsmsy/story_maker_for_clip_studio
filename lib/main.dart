@@ -13,7 +13,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:flutter_svg/flutter_svg.dart';
 
 enum ResultAlertDialog {
   ok,
@@ -53,9 +52,7 @@ class MyApp extends StatelessWidget {
         title: 'まんが用プロット作成ツール',
       ),
       routes: <String, WidgetBuilder>{
-        '/top-page': (BuildContext context) => const MyHomePage(
-              title: 'My Tool',
-            ),
+        '/top-page': (BuildContext context) => const MyHomePage(title: 'My Tool',),
         '/add-person-page': (BuildContext context) => const AddPersonPage(),
         '/edit-person-page': (BuildContext context) => const EditPersonPage(),
       },
@@ -165,68 +162,52 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-      ),
-      drawer: Drawer(
-          child: ListView(
-        padding: EdgeInsets.fromWindowPadding(WindowPadding.zero, 8.0),
-        children: <Widget>[
-          ListTile(
-            title: Text(
-              _user == null ? "ログインしていません" : "ようこそ、${_user?.displayName} さん",
-            ),
-          ),
-
-          /// TODO : 保存処理周りをFirebase Storageで実装する。
-          // ListTile(
-          //   leading: const Icon(Icons.save),
-          //   title: const Text("プロジェクトファイルを保存"),
-          //   onTap: () async {
-          //     /// TODO: ファイル保存処理は未実装のため、何かしら代替手段を考える必要がある
-          //     String? outputFile = await FilePicker.platform.saveFile(
-          //       dialogTitle: 'Please select an output file:',
-          //       fileName: 'output-file.txt',
-          //     );
-          //     if (outputFile == null) {
-          //       // User canceled the picker
-          //     }
-          //   },
-          // ),
-          // ListTile(
-          //   leading: const Icon(Icons.open_in_browser),
-          //   title: const Text("プロジェクトファイルを開く"),
-          //   onTap: () async {
-          //     final result = await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false);
-          //     if (result != null && result.files.isNotEmpty) {
-          //       final fileBytes = result.files.first.bytes;
-          //       final fileName = result.files.first.name;
-          //       /// TODO: firebase_storageでファイルをダウンロード・アップロードする処理を加えると扱えるっぽい。
-          //       print(fileName);
-          //     }
-          //   },
-          // ),
-
-          ListTile(
-            leading: Icon(
-              _user == null ? Icons.login : Icons.logout,
-              color: _user == null ? Colors.blue : Colors.red,
-            ),
-            title: Text(
-              _user == null ? "Googleでログイン" : "ログアウト",
-              style: TextStyle(
-                color: _user == null ? Colors.blue : Colors.red,
-                fontWeight: FontWeight.bold,
+        actions: [
+          Padding(
+            padding: EdgeInsets.all(_edgeValueMedium),
+            child: _user == null
+                ? OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                primary: Colors.blue,
+                padding: const EdgeInsets.all(_edgeValueMedium),
+                side: BorderSide(
+                  width: 2,
+                  color: isDark
+                      ? const Color(0x9e999999)
+                      : const Color(0x9e1c1c1c),
+                ),
               ),
+              onPressed: _googleSignin,
+              child: const Text("ログイン", style: TextStyle(fontSize: 15),),
+            )
+                : PopupMenuButton(
+              icon: ClipOval(
+                child: Material(
+                  color: Colors.white60,
+                  child: Image.network(
+                    _user?.photoURL as String,
+                    fit: BoxFit.fitHeight,
+                  ),
+                ),
+              ),
+              itemBuilder: (context) {
+                return [
+                  const PopupMenuItem(
+                    value: 'signout',
+                    child: Text('ログアウト'),
+                  ),
+                ];
+              },
+              onSelected: (String value) {
+                if(value == 'signout'){
+                  _googleAccountSignOut();
+                }
+              },
             ),
-            onTap: () {
-              if (_user == null) {
-                _googleSignin();
-              } else {
-                _googleAccountSignOut();
-              }
-            },
           ),
         ],
-      )),
+      ),
+
       body: Scrollbar(
         isAlwaysShown: true,
         child: SingleChildScrollView(
@@ -248,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       title: Text(
                         _expandedSettingsView ? "設定を閉じる" : "設定を開く",
                         style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       onExpansionChanged: (changed) {
                         _expandedSettingsView = changed;
@@ -261,8 +242,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           width: double.infinity,
                           child: ListTile(
                             title: const Text(
-                              '■ 登場人物設定',
-                              style: TextStyle(fontSize: 20),
+                              '登場人物設定',
+                              style: TextStyle(fontSize: 15),
                             ),
                             trailing: ElevatedButton(
                               onPressed: () async {
@@ -318,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                         constraints: const BoxConstraints(
                                           minWidth: 10.0,
                                         ),
-                                        child: Text(persons[index].name),
+                                        child: Text(persons[index].name, style: const TextStyle(fontSize: 14),),
                                       ),
                                       const SizedBox(
                                         width: 10.0,
@@ -329,8 +310,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                         ),
                                         child: Text(
                                           "■",
-                                          style: TextStyle(
-                                              color: persons[index].color),
+                                          style: TextStyle(color: persons[index].color),
                                         ),
                                       ),
                                     ],
@@ -368,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             children: [
                               Flexible(
                                 child: Text( "メモの色設定：",
-                                  style: TextStyle(color: textButtonColor, fontSize: 20,),
+                                  style: TextStyle(color: textButtonColor, fontSize: 15,),
                                 ),
                               ),
                               const SizedBox(
@@ -507,70 +487,63 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     ],
                   ),
                 ),
-                const Divider(
-                  thickness: 1.0,
-                  height: 20.0,
-                ),
 
-                /// OutputView
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ConstrainedBox(
-                          constraints: const BoxConstraints(),
-                          child: ElevatedButton(
-                            child: const Text(
-                              "読む用に出力",
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold),
-                            ),
-                            onPressed: () async {
-                              if (contents
-                                  .any((content) => content.line == "")) {
-                                ResultAlertDialog selection =
-                                    await _showWarningLineEmpty()
-                                        as ResultAlertDialog;
-                                if (selection == ResultAlertDialog.ok) {
-                                  _outputForReading(context);
-                                }
-                              } else {
-                                _outputForReading(context);
-                              }
-                            },
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ConstrainedBox(
-                          constraints: const BoxConstraints(),
-                          child: ElevatedButton(
-                            child: const Text(
-                              "クリスタ用に出力",
-                              style: TextStyle(fontSize: 15),
-                            ),
-                            onPressed: () async {
-                              if (contents
-                                  .any((content) => content.line == "")) {
-                                ResultAlertDialog selection =
-                                    await _showWarningLineEmpty()
-                                        as ResultAlertDialog;
-                                if (selection == ResultAlertDialog.ok) {
-                                  _outputForNameChanger(context);
-                                }
-                              } else {
-                                _outputForNameChanger(context);
-                              }
-                            },
-                          )),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
+        ),
+      ),
+
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConstrainedBox(
+                  constraints: const BoxConstraints(),
+                  child: ElevatedButton(
+                    child: const Text(
+                      "読む用出力",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15,),
+                    ),
+                    onPressed: () async {
+                      if (contents
+                          .any((content) => content.line == "")) {
+                        ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                        if (selection == ResultAlertDialog.ok) {
+                          _outputForReading(context);
+                        }
+                      } else {
+                        _outputForReading(context);
+                      }
+                    },
+                  )),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConstrainedBox(
+                  constraints: const BoxConstraints(),
+                  child: ElevatedButton(
+                    child: const Text(
+                      "クリスタ用出力",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                    onPressed: () async {
+                      if (contents.any((content) => content.line == "")) {
+                        ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                        if (selection == ResultAlertDialog.ok) {
+                          _outputForNameChanger(context);
+                        }
+                      } else {
+                        _outputForNameChanger(context);
+                      }
+                    },
+                  )),
+            ),
+          ],
         ),
       ),
     );
@@ -653,8 +626,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               width: 2.0,
               color: personsCombinedMemo[index].color,
             ),
-            borderRadius:
-                const BorderRadius.all(Radius.circular(_radiusValue))),
+            borderRadius: const BorderRadius.all(
+                Radius.circular(_radiusValue))),
         child: TextButton(
           onPressed: () {
             setState(() {
@@ -711,17 +684,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return ListTile(
       key: Key('$index'),
       contentPadding: const EdgeInsets.only(left: 20.0, right: 15),
-      leading: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "No." + (index + 1).toString(),
-            style: TextStyle(
-              color: contents[index].person.color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+      leading: Text(
+        "No." + (index + 1).toString(),
+        style: TextStyle(
+          color: contents[index].person.color,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       title: Transform.translate(
         offset: const Offset(10, 0),
@@ -760,25 +728,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           controller: contents[index].controller,
         ),
       ),
-      trailing: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                contents[index]
-                    .controller
-                    .removeListener(_reflectTextValueForContentsView);
-                contents.removeAt(index);
-              });
-            },
-            child: Icon(
-              Icons.remove_circle_outline_rounded,
-              color: Colors.red[400],
-            ),
-          )
-        ],
+      trailing: TextButton(
+        onPressed: () {
+          setState(() {
+            contents[index]
+                .controller
+                .removeListener(_reflectTextValueForContentsView);
+            contents.removeAt(index);
+          });
+        },
+        child: Icon(
+          Icons.remove_circle_outline_rounded,
+          color: Colors.red[400],
+        ),
       ),
     );
   }
@@ -950,8 +912,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // Create a new provider
     GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-    googleProvider
-        .addScope('https://www.googleapis.com/auth/contacts.readonly');
+    googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
     googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
 
     // Once signed in, return the UserCredential
@@ -966,8 +927,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     double result;
     scrollControllerForContentsView.position.maxScrollExtent == 0
         ? result = scrollControllerForContentsView.position.maxScrollExtent
-        : result =
-            scrollControllerForContentsView.position.maxScrollExtent + 62;
+        : result = scrollControllerForContentsView.position.maxScrollExtent + 62;
     return result;
   }
 }
