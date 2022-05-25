@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -17,6 +15,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 enum ResultAlertDialog {
   ok,
   cancel,
+}
+
+enum PersonButtonBuildTo{
+  memo,
+  serif,
+  mood,
 }
 
 void main() async {
@@ -75,7 +79,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   static const double _edgeValueSmall = 3.0;
 
   List<Person> persons = [];
-  List<Person> personsCombinedMemo = [];
   List<Content> contents = [];
 
   // List<TextEditingController> textEditingControllers = [];
@@ -112,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       Content(
         person: memo,
         line: "",
+        contentType: ContentType.memo,
         controller: TextEditingController(),
       ),
     );
@@ -164,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         title: Text(widget.title),
         actions: [
           Padding(
-            padding: EdgeInsets.all(_edgeValueMedium),
+            padding: const EdgeInsets.all(_edgeValueMedium),
             child: _user == null
                 ? OutlinedButton(
               style: OutlinedButton.styleFrom(
@@ -388,7 +392,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   height: 10.0,
                 ),
 
-                /// ContentsView
+                /// PersonListView
                 Row(
                   children: [
                     Container(
@@ -402,9 +406,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         height: 50.0,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: persons.length + 1,
+                          itemCount: persons.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return personListViewOfContentsView(index);
+                            return buildAddContentsButton(persons[index], ContentType.serif);
                           },
                         ),
                       ),
@@ -424,15 +428,50 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         height: 50.0,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: persons.length + 1,
+                          itemCount: persons.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return personListViewOfContentsViewForMood(index);
+                            if(persons[index].hasMood) {
+                              return buildAddContentsButton(
+                                  persons[index], ContentType.mood);
+                            } else {
+                              return Container(
+                                margin: const EdgeInsets.only(right: _edgeValueSmall),
+                                width: 100,
+                              );
+                            }
                           },
                         ),
                       ),
                     ),
                   ],
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(_edgeValueMedium),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: _edgeValueMedium),
+                        child: Container(
+                          margin: const EdgeInsets.only(right: _edgeValueSmall),
+                          width: 100,
+                          decoration: const BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(_radiusValue),
+                            ),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: (){},
+                            child: const Text("行を追加",),
+                          ),
+                        ),
+                      ),
+                      buildAddContentsButton(memo, ContentType.memo),
+                    ],
+                  ),
+                ),
+
+
                 const Divider(
                   thickness: 0,
                   height: 10.0,
@@ -464,8 +503,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           child: ElevatedButton(
                             onPressed: () => setState(() {
                               scrollControllerForContentsView.animateTo(
-                                -scrollControllerForContentsView
-                                    .position.minScrollExtent,
+                                -scrollControllerForContentsView.position.minScrollExtent,
                                 duration: const Duration(
                                     seconds: 1, milliseconds: 500),
                                 curve: Curves.ease,
@@ -549,40 +587,42 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _showIconForSerifOrMood(int index) {
-    if(contents[index].person.hasMood) {
-      return const Text("💭", style: TextStyle(fontSize: 25),);
-    } else {
-      return const Text("💬", style: TextStyle(fontSize: 25),);
+  Widget _showIconForSerifOrMood(ContentType contentType) {
+    switch(contentType){
+      case ContentType.memo:
+        return const Text("📝", style: TextStyle(fontSize: 25),);
+      case ContentType.serif:
+        return const Text("💬", style: TextStyle(fontSize: 25),);
+      case ContentType.mood:
+        return const Text("💭", style: TextStyle(fontSize: 25),);
     }
   }
 
-  Widget personListViewOfContentsView(int index) {
-    setCombinedPersons();
+  Widget buildAddContentsButton(Person person, ContentType contentType){
+    Widget widget;
 
-    return Container(
+    widget = Container(
       margin: const EdgeInsets.only(right: _edgeValueSmall),
       width: 100,
       decoration: BoxDecoration(
-          border: Border.all(
-            width: 2.0,
-            color: personsCombinedMemo[index].color,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(_radiusValue))),
+        border: Border.all(
+          width: 2.0,
+          color: person.color,
+        ),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(_radiusValue),
+        ),
+      ),
       child: TextButton(
         onPressed: () {
           setState(() {
             contents.add(Content(
-              person: Person(
-                name: personsCombinedMemo[index].name,
-                color: personsCombinedMemo[index].color,
-                hasMood: false,
-              ),
+              person: person,
               line: "",
+              contentType: contentType,
               controller: TextEditingController(),
             ));
-            contents[contents.length - 1]
-                .controller
+            contents[contents.length - 1].controller
                 .addListener(_reflectTextValueForContentsView);
           });
           scrollControllerForContentsView.animateTo(
@@ -597,7 +637,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: Padding(
           padding: EdgeInsets.zero,
           child: Text(
-            personsCombinedMemo[index].name,
+            person.name,
             textAlign: TextAlign.start,
             style: TextStyle(
               fontSize: 12,
@@ -607,82 +647,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         ),
       ),
     );
-  }
-
-  Widget personListViewOfContentsViewForMood(int index) {
-    setCombinedPersons();
-
-    Widget widget = Container(
-      margin: const EdgeInsets.only(right: _edgeValueSmall),
-      width: 100,
-    );
-
-    if (personsCombinedMemo[index].hasMood) {
-      widget = Container(
-        margin: const EdgeInsets.only(right: _edgeValueSmall),
-        width: 100,
-        decoration: BoxDecoration(
-            border: Border.all(
-              width: 2.0,
-              color: personsCombinedMemo[index].color,
-            ),
-            borderRadius: const BorderRadius.all(
-                Radius.circular(_radiusValue))),
-        child: TextButton(
-          onPressed: () {
-            setState(() {
-              contents.add(Content(
-                person: Person(
-                  name: personsCombinedMemo[index].name,
-                  color: personsCombinedMemo[index].color,
-                  hasMood: true,
-                ),
-                line: "",
-                controller: TextEditingController(),
-              ));
-              contents[contents.length - 1]
-                  .controller
-                  .addListener(_reflectTextValueForContentsView);
-            });
-            scrollControllerForContentsView.animateTo(
-              macContext(),
-              curve: Curves.ease,
-              duration: const Duration(
-                milliseconds: 750,
-              ),
-            );
-            // textEditingControllers.add(TextEditingController());
-          },
-          child: Padding(
-            padding: EdgeInsets.zero,
-            child: Text(
-              personsCombinedMemo[index].name,
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: 12,
-                color: textButtonColor,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
     return widget;
   }
 
-  void setCombinedPersons() {
-    if (persons.isEmpty) {
-      personsCombinedMemo = [memo];
-    } else {
-      personsCombinedMemo = [...persons];
-      if (personsCombinedMemo[0] != memo) personsCombinedMemo.insert(0, memo);
-    }
-  }
-
   Widget contentListViewOfContentsView(int index) {
     return Padding(
-      key: Key('${index}'),
+      key: Key('$index'),
       padding: const EdgeInsets.all(_edgeValueSmall),
       child: Row(
         children: [
@@ -704,7 +675,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 decoration: InputDecoration(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(_edgeValueMedium),
-                    child: _showIconForSerifOrMood(index),
+                    child: _showIconForSerifOrMood(contents[index].contentType),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(_radiusValue),
@@ -754,68 +725,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         ],
       ),
     );
-    //   ListTile(
-    //   key: Key('$index'),
-    //   contentPadding: const EdgeInsets.only(left: 20.0, right: 15),
-    //   leading: Text(
-    //     "No." + (index + 1).toString(),
-    //     style: TextStyle(
-    //       color: contents[index].person.color,
-    //       fontWeight: FontWeight.bold,
-    //     ),
-    //   ),
-    //   title: Transform.translate(
-    //     offset: const Offset(10, 0),
-    //     child: TextFormField(
-    //       decoration: InputDecoration(
-    //         prefixIcon: Padding(
-    //           padding: const EdgeInsets.all(_edgeValueMedium),
-    //           child: _showIconForSerifOrMood(index),
-    //         ),
-    //         focusedBorder: OutlineInputBorder(
-    //           borderRadius: BorderRadius.circular(_radiusValue),
-    //           borderSide: BorderSide(
-    //             color: contents[index].person.color,
-    //             width: 2.0,
-    //           ),
-    //         ),
-    //         labelStyle: TextStyle(
-    //           fontSize: 12,
-    //           color: contents[index].person.color,
-    //         ),
-    //         labelText: contents[index].person.name,
-    //         floatingLabelStyle: TextStyle(
-    //           fontSize: 16,
-    //           color: contents[index].person.color,
-    //         ),
-    //         enabledBorder: OutlineInputBorder(
-    //           borderRadius: BorderRadius.circular(_radiusValue),
-    //           borderSide: BorderSide(
-    //             color: contents[index].person.color,
-    //             width: 1.0,
-    //           ),
-    //         ),
-    //       ),
-    //       keyboardType: TextInputType.multiline,
-    //       maxLines: null,
-    //       controller: contents[index].controller,
-    //     ),
-    //   ),
-    //   trailing: TextButton(
-    //     onPressed: () {
-    //       setState(() {
-    //         contents[index]
-    //             .controller
-    //             .removeListener(_reflectTextValueForContentsView);
-    //         contents.removeAt(index);
-    //       });
-    //     },
-    //     child: Icon(
-    //       Icons.remove_circle_outline_rounded,
-    //       color: Colors.red[400],
-    //     ),
-    //   ),
-    // );
   }
 
   Future<Color?> openColorSettingDialog(BuildContext context) {
