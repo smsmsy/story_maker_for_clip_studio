@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_launcher_icons/ios.dart';
 
 import 'pages/add_person_page.dart';
 import 'color_setting_dialog.dart';
@@ -79,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   static const double _edgeValueSmall = 3.0;
 
   List<Person> persons = [];
-  List<Content> contents = [];
+  List contents = [];
 
   // List<TextEditingController> textEditingControllers = [];
   final Person memo = Person(name: "メモ", color: Colors.grey, hasMood: false);
@@ -117,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         line: "",
         contentType: ContentType.memo,
         controller: TextEditingController(),
+        hasPageEnd: false,
       ),
     );
 
@@ -621,12 +623,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               line: "",
               contentType: contentType,
               controller: TextEditingController(),
+              hasPageEnd: false,
             ));
             contents[contents.length - 1].controller
                 .addListener(_reflectTextValueForContentsView);
           });
           scrollControllerForContentsView.animateTo(
-            macContext(),
+            maxContext(),
             curve: Curves.ease,
             duration: const Duration(
               milliseconds: 750,
@@ -651,80 +654,198 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return widget;
   }
 
-  Widget contentListViewOfContentsView(int index) {
-    return Padding(
-      key: Key('$index'),
-      padding: const EdgeInsets.all(_edgeValueSmall),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(_edgeValueMedium),
-            child: Text(
-              "No." + (index + 1).toString(),
-              style: TextStyle(
-                color: contents[index].person.color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+  void _updateContentListForReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+      if(contents[oldIndex] is Divider) {
+        contents[oldIndex - 1].hasPageEnd = false;
+      }
+      final newContent = contents.removeAt(oldIndex);
+      contents.insert(newIndex, newContent);
 
-          Expanded(
-            child: Transform.translate(
-              offset: const Offset(10, 0),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.all(_edgeValueMedium),
-                    child: _showIconForSerifOrMood(contents[index].contentType),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(_radiusValue),
-                    borderSide: BorderSide(
+      if(contents[newIndex] is Content) {
+        contents[newIndex].controller.addListener(() {
+          _reflectTextValueForContentsView();
+        });
+      } else if(contents[newIndex] is Divider) {
+        if(newIndex == 0){
+          contents.removeAt(0);
+        }
+        else if(contents[newIndex - 1] is Content) {
+          contents[newIndex - 1].hasPageEnd = true;
+        } else if (contents[newIndex - 1] is Divider ) {
+          contents.removeAt(newIndex - 1);
+        } else if (contents[newIndex + 1] is Divider ) {
+          contents.removeAt(newIndex);
+        }
+      }
+    });
+  }
+
+  Widget contentListViewOfContentsView(int index) {
+    Widget widget;
+
+    if(contents[index] is Content){
+      return Padding(
+        key: Key('$index'),
+        padding: const EdgeInsets.all(_edgeValueSmall),
+        child: Row(
+          children: [
+            Column(
+              children: [
+                const SizedBox(width: 50.0, height: 20.0,),
+                Padding(
+                  padding: const EdgeInsets.all(_edgeValueSmall),
+                  child: Text(
+                    "No." + (index + 1).toString(),
+                    style: TextStyle(
                       color: contents[index].person.color,
-                      width: 2.0,
-                    ),
-                  ),
-                  labelStyle: TextStyle(
-                    fontSize: 12,
-                    color: contents[index].person.color,
-                  ),
-                  labelText: contents[index].person.name,
-                  floatingLabelStyle: TextStyle(
-                    fontSize: 16,
-                    color: contents[index].person.color,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(_radiusValue),
-                    borderSide: BorderSide(
-                      color: contents[index].person.color,
-                      width: 1.0,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                controller: contents[index].controller,
+                SizedBox(
+                  width: 50.0,
+                  height: 20.0,
+                  child: OutlinedButton(
+                    onPressed: () => setState(() {
+                      if(contents[index].hasPageEnd) {
+                        contents[index].hasPageEnd = false;
+                        contents.removeAt(index + 1);
+                      } else {
+                        contents[index].hasPageEnd = true;
+                        contents.insert(index + 1, const Divider());
+                      }
+                    }),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text("Page", style: TextStyle(fontSize: 10.0),),
+                        Icon(
+                          contents[index].hasPageEnd
+                              ? Icons.remove_circle
+                              : Icons.add_circle,
+                          size: 10.0,
+                        ),
+                      ],
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      primary: contents[index].hasPageEnd
+                          ? Colors.red
+                          : Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Expanded(
+              child: Transform.translate(
+                offset: const Offset(10, 0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(_edgeValueMedium),
+                      child: _showIconForSerifOrMood(contents[index].contentType),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(_radiusValue),
+                      borderSide: BorderSide(
+                        color: contents[index].person.color,
+                        width: 2.0,
+                      ),
+                    ),
+                    labelStyle: TextStyle(
+                      fontSize: 12,
+                      color: contents[index].person.color,
+                    ),
+                    labelText: contents[index].person.name,
+                    floatingLabelStyle: TextStyle(
+                      fontSize: 16,
+                      color: contents[index].person.color,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(_radiusValue),
+                      borderSide: BorderSide(
+                        color: contents[index].person.color,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  controller: contents[index].controller,
+                ),
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                contents[index]
-                    .controller
-                    .removeListener(_reflectTextValueForContentsView);
-                contents.removeAt(index);
-              });
-            },
-            child: Icon(
-              Icons.remove_circle_outline_rounded,
-              color: Colors.red[400],
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  contents[index]
+                      .controller
+                      .removeListener(_reflectTextValueForContentsView);
+                  contents.removeAt(index);
+                });
+              },
+              child: Icon(
+                Icons.remove_circle_outline_rounded,
+                color: Colors.red[400],
+              ),
             ),
+            const SizedBox(width: 20,)
+          ],
+        ),
+      );
+    } else if(contents[index] is Divider){
+      return Container(
+        key: Key('$index'),
+        child: _pageDivider(index),
+      );
+    } else {
+      return Container(
+        key: Key('$index'),
+      );
+    }
+  }
+
+  Widget _pageDivider(int index) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        const Expanded(
+          child: Divider(),
+        ),
+
+        Container(
+          width: 100.0,
+          alignment: Alignment.center,
+          child: Text(
+            "Page ${getPageNum(index)}",
+            style: TextStyle(),
           ),
-          const SizedBox(width: 10,)
-        ],
-      ),
+        ),
+
+        const Expanded(
+          child: Divider(),
+        ),
+        const SizedBox(
+          width: 20.0,
+        ),
+      ],
     );
+  }
+
+  int getPageNum(int index) {
+    int count = 0;
+    for(int i = 0; i < index ; i++){
+      if(contents[i] is Divider) continue;
+      if(contents[i].hasPageEnd) count++;
+
+    }
+    return count;
   }
 
   Future<Color?> openColorSettingDialog(BuildContext context) {
@@ -877,18 +998,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         });
   }
 
-  void _updateContentListForReorder(int oldIndex, int newIndex) {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
-    // final TextEditingController newController = textEditingControllers.removeAt(oldIndex);
-    final Content newContent = contents.removeAt(oldIndex);
-    contents.insert(newIndex, newContent);
-    // textEditingControllers.insert(newIndex, newController);
-    contents[newIndex].controller.addListener(() {
-      _reflectTextValueForContentsView();
-    });
-  }
+
 
   Future<UserCredential> _googleSignin() async {
     // Create a new provider
@@ -905,11 +1015,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return await FirebaseAuth.instance.signOut();
   }
 
-  double macContext() {
+  double maxContext() {
     double result;
     scrollControllerForContentsView.position.maxScrollExtent == 0
         ? result = scrollControllerForContentsView.position.maxScrollExtent
         : result = scrollControllerForContentsView.position.maxScrollExtent + 62;
     return result;
   }
+
 }

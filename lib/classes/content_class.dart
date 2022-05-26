@@ -14,6 +14,7 @@ class Content {
   String line;
   ContentType contentType;
   TextEditingController controller;
+  bool hasPageEnd;
 
 //<editor-fold desc="Data Methods">
 
@@ -22,6 +23,7 @@ class Content {
     required this.line,
     required this.contentType,
     required this.controller,
+    required this.hasPageEnd,
   });
 
   @override
@@ -32,14 +34,16 @@ class Content {
           person == other.person &&
           line == other.line &&
           contentType == other.contentType &&
-          controller == other.controller);
+          controller == other.controller &&
+          hasPageEnd == other.hasPageEnd);
 
   @override
   int get hashCode =>
       person.hashCode ^
       line.hashCode ^
       contentType.hashCode ^
-      controller.hashCode;
+      controller.hashCode ^
+      hasPageEnd.hashCode;
 
   @override
   String toString() {
@@ -48,6 +52,7 @@ class Content {
         ' line: $line,' +
         ' contentType: $contentType,' +
         ' controller: $controller,' +
+        ' hasPageEnd: $hasPageEnd,' +
         '}';
   }
 
@@ -56,12 +61,14 @@ class Content {
     String? line,
     ContentType? contentType,
     TextEditingController? controller,
+    bool? hasPageEnd,
   }) {
     return Content(
       person: person ?? this.person,
       line: line ?? this.line,
       contentType: contentType ?? this.contentType,
       controller: controller ?? this.controller,
+      hasPageEnd: hasPageEnd ?? this.hasPageEnd,
     );
   }
 
@@ -71,6 +78,7 @@ class Content {
       'line': this.line,
       'contentType': this.contentType,
       'controller': this.controller,
+      'hasPageEnd': this.hasPageEnd,
     };
   }
 
@@ -80,6 +88,7 @@ class Content {
       line: map['line'] as String,
       contentType: map['contentType'] as ContentType,
       controller: map['controller'] as TextEditingController,
+      hasPageEnd: map['hasPageEnd'] as bool,
     );
   }
 
