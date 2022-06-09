@@ -11,13 +11,13 @@ class AddPersonPage extends StatefulWidget {
 }
 
 class _AddPersonPageState extends State<AddPersonPage> {
-  Person person = Person(name: "名称未設定", color: Colors.blue, hasMood: false);
+  Person person = Person(name: "名称未設定", color: Colors.blue, hasMood: true);
 
   void _handlePersonName(String e) => setState(() => person.name = e);
 
   void _changeColor(Color color) => setState(() => person.color = color);
 
-  bool _isSelected = false;
+  bool _isSelected = true;
   void _handleCheckBox(bool? value) => setState(() {
     _isSelected = value!;
     person.hasMood = _isSelected;
