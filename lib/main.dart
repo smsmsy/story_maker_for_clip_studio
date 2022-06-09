@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_launcher_icons/ios.dart';
 
@@ -220,316 +221,319 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(_edgeValueLarge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// SettingsView
-                Container(
-                  padding: const EdgeInsets.all(_edgeValueMedium),
-                  color: isDark
-                      ? const Color(0x1FFFFFFF)
-                      : const Color(0x1F000000),
-                  child: Theme(
-                    data: Theme.of(context)
-                        .copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      title: Text(
-                        _expandedSettingsView ? "設定を閉じる" : "設定を開く",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      onExpansionChanged: (changed) {
-                        _expandedSettingsView = changed;
-                        setState(() {});
-                      },
-                      children: [
-                        /// 登場人物設定
-                        Container(
-                          margin: EdgeInsets.zero,
-                          width: double.infinity,
-                          child: ListTile(
-                            title: const Text(
-                              '登場人物設定',
-                              style: TextStyle(fontSize: 15),
-                            ),
-                            trailing: ElevatedButton(
-                              onPressed: () async {
-                                final result = await Navigator.pushNamed(
-                                    context, '/add-person-page');
-                                if (result is Person) {
-                                  setState(() => persons.add(result));
-                                }
-                              },
-                              child: const Icon(Icons.add),
-                            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    /// SettingsView
+                    Container(
+                      padding: const EdgeInsets.all(_edgeValueMedium),
+                      color: isDark
+                          ? const Color(0x1FFFFFFF)
+                          : const Color(0x1F000000),
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          title: Text(
+                            _expandedSettingsView ? "設定を閉じる" : "設定を開く",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(width: 1.0),
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(_radiusValue))),
-                          margin: const EdgeInsets.only(top: 5.0),
-                          height: 230.0,
-                          child: ListView.builder(
-                            itemCount: persons.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                decoration: const BoxDecoration(
-                                  border: Border(bottom: BorderSide(width: 0.5)),
+                          onExpansionChanged: (changed) {
+                            _expandedSettingsView = changed;
+                            setState(() {});
+                          },
+                          children: [
+                            /// 登場人物設定
+                            Container(
+                              margin: EdgeInsets.zero,
+                              width: double.infinity,
+                              child: ListTile(
+                                title: const Text(
+                                  '登場人物設定',
+                                  style: TextStyle(fontSize: 15),
                                 ),
-                                child: ListTile(
-                                  onTap: () async {
-                                    final newPerson = await Navigator.pushNamed(
-                                        context, '/edit-person-page',
-                                        arguments: persons[index]);
-                                    if (newPerson is Person) {
-                                      setState(() {
-                                        persons[index] = newPerson;
-                                      });
+                                trailing: ElevatedButton(
+                                  onPressed: () async {
+                                    final result = await Navigator.pushNamed(
+                                        context, '/add-person-page');
+                                    if (result is Person) {
+                                      setState(() => persons.add(result));
                                     }
                                   },
-                                  leading: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "No." + (index + 1).toString(),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  title: Row(
-                                    children: <Widget>[
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          minWidth: 10.0,
-                                        ),
-                                        child: Text(persons[index].name, style: const TextStyle(fontSize: 14),),
-                                      ),
-                                      const SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          minWidth: 100.0,
-                                        ),
-                                        child: Text(
-                                          "■",
-                                          style: TextStyle(color: persons[index].color),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  trailing: PopupMenuButton(
-                                    icon: const Icon(Icons.more_vert),
-                                    itemBuilder: (context) {
-                                      return [
-                                        const PopupMenuItem(
-                                          value: 'edit',
-                                          child: Text('編集'),
-                                        ),
-                                        const PopupMenuItem(
-                                          value: 'delete',
-                                          child: Text('削除'),
-                                        )
-                                      ];
-                                    },
-                                    onSelected: (String value) async {
-                                      if (value == 'delete') {
-                                        _showPersonRemoveAlertDialog(index);
-                                      } else if (value == 'edit') {
-                                        _showEditPersonPage(persons[index]);
-                                      }
-                                    },
-                                  ),
+                                  child: const Icon(Icons.add),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(width: 1.0),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(_radiusValue))),
+                              margin: const EdgeInsets.only(top: 5.0),
+                              height: 230.0,
+                              child: ListView.builder(
+                                itemCount: persons.length,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      border: Border(bottom: BorderSide(width: 0.5)),
+                                    ),
+                                    child: ListTile(
+                                      onTap: () async {
+                                        final newPerson = await Navigator.pushNamed(
+                                            context, '/edit-person-page',
+                                            arguments: persons[index]);
+                                        if (newPerson is Person) {
+                                          setState(() {
+                                            persons[index] = newPerson;
+                                          });
+                                        }
+                                      },
+                                      leading: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "No." + (index + 1).toString(),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      title: Row(
+                                        children: <Widget>[
+                                          ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                              minWidth: 10.0,
+                                            ),
+                                            child: Text(persons[index].name, style: const TextStyle(fontSize: 14),),
+                                          ),
+                                          const SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                              minWidth: 100.0,
+                                            ),
+                                            child: Text(
+                                              "■",
+                                              style: TextStyle(color: persons[index].color),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: PopupMenuButton(
+                                        icon: const Icon(Icons.more_vert),
+                                        itemBuilder: (context) {
+                                          return [
+                                            const PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text('編集'),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text('削除'),
+                                            )
+                                          ];
+                                        },
+                                        onSelected: (String value) async {
+                                          if (value == 'delete') {
+                                            _showPersonRemoveAlertDialog(index);
+                                          } else if (value == 'edit') {
+                                            _showEditPersonPage(persons[index]);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(_edgeValueMedium),
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text( "メモの色設定：",
+                                      style: TextStyle(color: textButtonColor, fontSize: 15,),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  SizedBox(
+                                    child: TextButton(
+                                      onPressed: () async {
+                                        final color = await openColorSettingDialog(context);
+                                        _changeMemoColor(color!);
+                                      },
+                                      child: Text(
+                                        "■",
+                                        style: TextStyle(
+                                          color: memo.color,
+                                          fontSize: 30.0,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        side: const BorderSide(
+                                          color: Colors.blue,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(_edgeValueMedium),
-                          child: Row(
-                            children: [
-                              Flexible(
-                                child: Text( "メモの色設定：",
-                                  style: TextStyle(color: textButtonColor, fontSize: 15,),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                              SizedBox(
-                                child: TextButton(
-                                  onPressed: () async {
-                                    final color = await openColorSettingDialog(context);
-                                    _changeMemoColor(color!);
-                                  },
-                                  child: Text(
-                                    "■",
-                                    style: TextStyle(
-                                      color: memo.color,
-                                      fontSize: 30.0,
-                                    ),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    side: const BorderSide(
-                                      color: Colors.blue,
-                                      width: 2.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                      ),
+                    ),
+                    const Divider(
+                      thickness: 0,
+                      height: 10.0,
+                    ),
+
+                    /// PersonListView
+                    Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          alignment: Alignment.center,
+                          child: const Text("💬", style: TextStyle(fontSize: 25),),
+                        ),
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.all(_edgeValueSmall),
+                            height: 50.0,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: persons.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return buildAddContentsButton(persons[index], ContentType.serif);
+                              },
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                const Divider(
-                  thickness: 0,
-                  height: 10.0,
-                ),
-
-                /// PersonListView
-                Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      alignment: Alignment.center,
-                      child: const Text("💬", style: TextStyle(fontSize: 25),),
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.all(_edgeValueSmall),
-                        height: 50.0,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: persons.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return buildAddContentsButton(persons[index], ContentType.serif);
-                          },
+                    Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          alignment: Alignment.center,
+                          child: const Text("💭", style: TextStyle(fontSize: 25),),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Container(
-                      width: 50,
-                      alignment: Alignment.center,
-                      child: const Text("💭", style: TextStyle(fontSize: 25),),
-                    ),
-                    Flexible(
-                      child: Container(
-                        margin: const EdgeInsets.all(_edgeValueSmall),
-                        height: 50.0,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: persons.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            if(persons[index].hasMood) {
-                              return buildAddContentsButton(
-                                  persons[index], ContentType.mood);
-                            } else {
-                              return Container(
-                                margin: const EdgeInsets.only(right: _edgeValueSmall),
-                                width: 100,
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(_edgeValueMedium),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: _edgeValueMedium),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: _edgeValueSmall),
-                          width: 100,
-                          decoration: const BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(_radiusValue),
+                        Flexible(
+                          child: Container(
+                            margin: const EdgeInsets.all(_edgeValueSmall),
+                            height: 50.0,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: persons.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                if(persons[index].hasMood) {
+                                  return buildAddContentsButton(
+                                      persons[index], ContentType.mood);
+                                } else {
+                                  return Container(
+                                    margin: const EdgeInsets.only(right: _edgeValueSmall),
+                                    width: 100,
+                                  );
+                                }
+                              },
                             ),
                           ),
-                          child: ElevatedButton(
-                            onPressed: (){},
-                            child: const Text("行を追加",),
+                        ),
+                      ],
+                    ),Row(
+                      children: [
+                        Container(
+                          width: 50,
+                          alignment: Alignment.center,
+                          child: const Text("📝", style: TextStyle(fontSize: 25),),
+                        ),
+                        Flexible(
+                          child: Container(
+                            margin: const EdgeInsets.all(_edgeValueSmall),
+                            height: 50.0,
+                            child: buildAddContentsButton(memo, ContentType.memo)
                           ),
                         ),
+                      ],
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: _edgeValueLarge, vertical: _edgeValueMedium),
+                    //   child: Row(
+                    //     children: [
+                    //       buildAddContentsButton(memo, ContentType.memo),
+                    //     ],
+                    //   ),
+                    // ),
+
+
+                    const Divider(
+                      thickness: 0,
+                      height: 10.0,
+                    ),
+
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 2),
                       ),
-                      buildAddContentsButton(memo, ContentType.memo),
-                    ],
-                  ),
-                ),
-
-
-                const Divider(
-                  thickness: 0,
-                  height: 10.0,
-                ),
-
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 2),
-                  ),
-                  padding: const EdgeInsets.all(_edgeValueMedium),
-                  height: 500,
-                  child: Stack(
-                    children: [
-                      ReorderableListView.builder(
-                        scrollController: scrollControllerForContentsView,
-                        buildDefaultDragHandles: true,
-                        itemCount: contents.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return contentListViewOfContentsView(index);
-                        },
-                        onReorder: (int oldIndex, int newIndex) {
-                          _updateContentListForReorder(oldIndex, newIndex);
-                        },
-                      ),
-                      Align(
-                        alignment: const Alignment(1, 1),
-                        child: SizedBox(
-                          width: 40.0,
-                          child: ElevatedButton(
-                            onPressed: () => setState(() {
-                              scrollControllerForContentsView.animateTo(
-                                -scrollControllerForContentsView.position.minScrollExtent,
-                                duration: const Duration(
-                                    seconds: 1, milliseconds: 500),
-                                curve: Curves.ease,
-                              );
-                            }),
-                            child: const Icon(
-                              Icons.arrow_upward_rounded,
-                              size: 20.0,
-                            ),
-                            style: ButtonStyle(
-                              padding: MaterialStateProperty.all(EdgeInsets.zero),
-                              backgroundColor: MaterialStateProperty.all(
-                                const Color(0xcc5e5e5e),
+                      padding: const EdgeInsets.all(_edgeValueMedium),
+                      height: 500,
+                      child: Stack(
+                        children: [
+                          ReorderableListView.builder(
+                            scrollController: scrollControllerForContentsView,
+                            buildDefaultDragHandles: true,
+                            itemCount: contents.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return contentListViewOfContentsView(index);
+                            },
+                            onReorder: (int oldIndex, int newIndex) {
+                              _updateContentListForReorder(oldIndex, newIndex);
+                            },
+                          ),
+                          Align(
+                            alignment: const Alignment(1, 1),
+                            child: SizedBox(
+                              width: 40.0,
+                              child: ElevatedButton(
+                                onPressed: () => setState(() {
+                                  scrollControllerForContentsView.animateTo(
+                                    -scrollControllerForContentsView.position.minScrollExtent,
+                                    duration: const Duration(
+                                        seconds: 1, milliseconds: 500),
+                                    curve: Curves.ease,
+                                  );
+                                }),
+                                child: const Icon(
+                                  Icons.arrow_upward_rounded,
+                                  size: 20.0,
+                                ),
+                                style: ButtonStyle(
+                                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                                  backgroundColor: MaterialStateProperty.all(
+                                    const Color(0xcc5e5e5e),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),
