@@ -12,6 +12,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:auto_size_text/auto_size_text.dart';
 
 enum ResultAlertDialog {
   ok,
@@ -639,13 +640,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         },
         child: Padding(
           padding: EdgeInsets.zero,
-          child: Text(
+          child: AutoSizeText(
             person.name,
             textAlign: TextAlign.start,
             style: TextStyle(
               fontSize: 12,
               color: textButtonColor,
             ),
+            maxLines: 2,
           ),
         ),
       ),
