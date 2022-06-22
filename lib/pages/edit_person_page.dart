@@ -24,6 +24,7 @@ class _EditPersonPageState extends State<EditPersonPage> {
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     person = ModalRoute.of(context)?.settings.arguments as Person;
     _isSelected = person.hasMood;
   }

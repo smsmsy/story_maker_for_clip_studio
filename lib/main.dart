@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_launcher_icons/ios.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 import 'pages/add_person_page.dart';
 import 'color_setting_dialog.dart';
@@ -9,11 +8,6 @@ import 'classes/content_class.dart';
 import 'pages/edit_person_page.dart';
 import 'classes/person_class.dart';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:auto_size_text/auto_size_text.dart';
 
 enum ResultAlertDialog {
   ok,
@@ -28,14 +22,6 @@ enum PersonButtonBuildTo{
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-  googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-  googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
 
   runApp(const MyApp());
 }
@@ -100,14 +86,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      setState(() {
-        _user = user;
-      });
-    });
-
-    WidgetsBinding.instance?.addObserver(this);
-    _brightness = WidgetsBinding.instance?.window.platformBrightness;
+    WidgetsBinding.instance.addObserver(this);
+    _brightness = WidgetsBinding.instance.window.platformBrightness;
     isDark = _brightness == Brightness.dark;
     textButtonColor = isDark ? Colors.white : Colors.black;
 
@@ -127,16 +107,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     for (int i = 0; i < contents.length; i++) {
       contents[i].controller.addListener(_reflectTextValueForContentsView);
     }
-
-    // scrollControllerForContentsView = ScrollController();
-    // scrollControllerForContentsView.addListener(_reflectMaxExtentScrollControllerForContentsView);
   }
 
   @override
   void didChangePlatformBrightness() {
     if (mounted) {
       setState(() {
-        _brightness = WidgetsBinding.instance?.window.platformBrightness;
+        _brightness = WidgetsBinding.instance.window.platformBrightness;
         isDark = _brightness == Brightness.dark;
         textButtonColor = isDark ? Colors.white : Colors.black;
       });
@@ -153,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     for (var content in contents) {
       content.controller.dispose();
     }
@@ -163,61 +140,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  User? _user;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(_edgeValueMedium),
-            child: _user == null
-                ? OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                primary: Colors.blue,
-                padding: const EdgeInsets.all(_edgeValueMedium),
-                side: BorderSide(
-                  width: 2,
-                  color: isDark
-                      ? const Color(0x9e999999)
-                      : const Color(0x9e1c1c1c),
-                ),
-              ),
-              onPressed: _googleSignin,
-              child: const Text("ログイン", style: TextStyle(fontSize: 15),),
-            )
-                : PopupMenuButton(
-              icon: ClipOval(
-                child: Material(
-                  color: Colors.white60,
-                  child: Image.network(
-                    _user?.photoURL as String,
-                    fit: BoxFit.fitHeight,
-                  ),
-                ),
-              ),
-              itemBuilder: (context) {
-                return [
-                  const PopupMenuItem(
-                    value: 'signout',
-                    child: Text('ログアウト'),
-                  ),
-                ];
-              },
-              onSelected: (String value) {
-                if(value == 'signout'){
-                  _googleAccountSignOut();
-                }
-              },
-            ),
-          ),
-        ],
       ),
 
       body: Scrollbar(
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(_edgeValueLarge),
@@ -462,20 +393,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           child: Container(
                             margin: const EdgeInsets.all(_edgeValueSmall),
                             height: 50.0,
-                            child: buildAddContentsButton(memo, ContentType.memo)
+                            child: buildAddContentsButton(memo, ContentType.memo),
                           ),
                         ),
                       ],
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(horizontal: _edgeValueLarge, vertical: _edgeValueMedium),
-                    //   child: Row(
-                    //     children: [
-                    //       buildAddContentsButton(memo, ContentType.memo),
-                    //     ],
-                    //   ),
-                    // ),
-
 
                     const Divider(
                       thickness: 0,
@@ -530,7 +452,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -691,8 +612,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Widget contentListViewOfContentsView(int index) {
-    Widget widget;
-
     if(contents[index] is Content){
       return Padding(
         key: Key('$index'),
@@ -830,7 +749,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           alignment: Alignment.center,
           child: Text(
             "Page ${getPageNum(index)}",
-            style: TextStyle(),
+            style: const TextStyle(),
           ),
         ),
 
@@ -931,10 +850,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 decoration: BoxDecoration(
                   border: Border.all(width: 1.0),
                   borderRadius:
-                      const BorderRadius.all(Radius.circular(_radiusValue)),
+                    const BorderRadius.all(Radius.circular(_radiusValue)),
                 ),
                 child: Scrollbar(
-                  isAlwaysShown: true,
+                  thumbVisibility: true,
                   child: SingleChildScrollView(
                     child: SelectableText(
                       contentsForOutputToNameChanger,
@@ -947,7 +866,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     child: const Text("クリップボードにコピー"),
                     onPressed: () async {
                       final data =
-                          ClipboardData(text: contentsForOutputToNameChanger);
+                        ClipboardData(text: contentsForOutputToNameChanger);
                       await Clipboard.setData(data);
                     }),
                 TextButton(
@@ -1002,23 +921,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 ]),
           );
         });
-  }
-
-
-
-  Future<UserCredential> _googleSignin() async {
-    // Create a new provider
-    GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-    googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-    googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithPopup(googleProvider);
-  }
-
-  Future<void> _googleAccountSignOut() async {
-    return await FirebaseAuth.instance.signOut();
   }
 
   double maxContext() {

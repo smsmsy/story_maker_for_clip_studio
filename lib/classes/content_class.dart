@@ -29,13 +29,14 @@ class Content {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Content &&
-          runtimeType == other.runtimeType &&
-          person == other.person &&
-          line == other.line &&
-          contentType == other.contentType &&
-          controller == other.controller &&
-          hasPageEnd == other.hasPageEnd);
+          (other is Content &&
+              runtimeType == other.runtimeType &&
+              person == other.person &&
+              line == other.line &&
+              contentType == other.contentType &&
+              controller == other.controller &&
+              hasPageEnd == other.hasPageEnd
+          );
 
   @override
   int get hashCode =>
@@ -47,13 +48,7 @@ class Content {
 
   @override
   String toString() {
-    return 'Content{' +
-        ' person: $person,' +
-        ' line: $line,' +
-        ' contentType: $contentType,' +
-        ' controller: $controller,' +
-        ' hasPageEnd: $hasPageEnd,' +
-        '}';
+    return 'Content{ person: $person, line: $line, contentType: $contentType, controller: $controller, hasPageEnd: $hasPageEnd,}';
   }
 
   Content copyWith({
@@ -74,11 +69,11 @@ class Content {
 
   Map<String, dynamic> toMap() {
     return {
-      'person': this.person,
-      'line': this.line,
-      'contentType': this.contentType,
-      'controller': this.controller,
-      'hasPageEnd': this.hasPageEnd,
+      'person': person,
+      'line': line,
+      'contentType': contentType,
+      'controller': controller,
+      'hasPageEnd': hasPageEnd,
     };
   }
 
