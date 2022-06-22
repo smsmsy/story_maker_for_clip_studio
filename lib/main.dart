@@ -7,6 +7,7 @@ import 'package:story_maker_for_clip_studio/classes/person_class.dart';
 import 'package:story_maker_for_clip_studio/views/add_person_page.dart';
 import 'package:story_maker_for_clip_studio/views/color_setting_dialog.dart';
 import 'package:story_maker_for_clip_studio/views/edit_person_page.dart';
+import 'package:story_maker_for_clip_studio/views/output_pdf_view.dart';
 
 
 enum ResultAlertDialog {
@@ -70,7 +71,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   List<Person> persons = [];
   List contents = [];
 
-  // List<TextEditingController> textEditingControllers = [];
   final Person memo = Person(name: "メモ", color: Colors.grey, hasMood: false);
 
   late Color textButtonColor;
@@ -81,6 +81,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   ScrollController scrollControllerForContentsView = ScrollController();
   double maxExtent = 0;
+
+  String _bookTitle = '無題';
 
   @override
   void initState() {
@@ -144,7 +146,27 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('タイトル'),
+            const SizedBox(width: 15.0,),
+            const Text(':'),
+            const SizedBox(width: 15.0,),
+            Text(
+              _bookTitle,
+              style: const TextStyle(fontSize: 30.0),
+            ),
+            IconButton(
+              onPressed: () async{
+                final inputs = await _showChangeTitleDialog(_bookTitle);
+                setState(() => _bookTitle = inputs!);
+              },
+              icon: const Icon(Icons.filter_list_alt, size: 20.0,),
+            ),
+
+          ],
+        ),
       ),
 
       body: Scrollbar(
@@ -384,7 +406,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           ),
                         ),
                       ],
-                    ),Row(
+                    ),
+                    Row(
                       children: [
                         Container(
                           width: 50,
@@ -464,13 +487,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+
             Padding(
               padding: const EdgeInsets.all(_edgeValueLarge),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(),
                 child: ElevatedButton(
                   child: const Text(
-                    "読む用出力",
+                    "PDFで出力",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15,),
                   ),
@@ -479,10 +503,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         .any((content) => content.line == "")) {
                       ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
                       if (selection == ResultAlertDialog.ok) {
-                        _outputForReading(context);
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewPDFPage(contents)));
                       }
                     } else {
-                      _outputForReading(context);
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewPDFPage(contents)));
                     }
                   },
                 ),
@@ -494,7 +518,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 constraints: const BoxConstraints(),
                 child: ElevatedButton(
                   child: const Text(
-                    "クリスタ用出力",
+                    "クリスタ用に出力",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15),
                   ),
@@ -833,8 +857,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void _changeMemoColor(Color color) => setState(() => memo.color = color);
 
-  void _outputForReading(BuildContext context) {}
-
   Future<void> _outputForNameChanger(BuildContext context) async {
     String contentsForOutputToNameChanger = "";
     contentsForOutputToNameChanger = generateContentsToTextFile();
@@ -937,4 +959,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return result;
   }
 
+  Future<String?> _showChangeTitleDialog(String _beforeTitle) {
+    TextEditingController controller = TextEditingController(text: _beforeTitle);
+    return showDialog <String>(
+      context: context,
+      builder: (context){
+        return AlertDialog(
+          title: const Text('タイトル設定ダイアログ'),
+          content: TextField(
+            controller: controller,
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: (){
+                Navigator.of(context).pop(
+                    controller.text == '' ? '無題' : controller.text
+                );
+              },
+              child: const Text("設定"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
