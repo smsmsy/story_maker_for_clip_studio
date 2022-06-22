@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:story_maker_for_clip_studio/classes/content_class.dart';
+import 'package:story_maker_for_clip_studio/classes/person_class.dart';
 
-import 'pages/add_person_page.dart';
-import 'color_setting_dialog.dart';
-import 'classes/content_class.dart';
-import 'pages/edit_person_page.dart';
-import 'classes/person_class.dart';
+import 'package:story_maker_for_clip_studio/views/add_person_page.dart';
+import 'package:story_maker_for_clip_studio/views/color_setting_dialog.dart';
+import 'package:story_maker_for_clip_studio/views/edit_person_page.dart';
 
 
 enum ResultAlertDialog {

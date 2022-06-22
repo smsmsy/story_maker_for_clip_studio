@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../color_setting_dialog.dart';
+import 'color_setting_dialog.dart';
 import '../classes/person_class.dart';
 
 class AddPersonPage extends StatefulWidget {
