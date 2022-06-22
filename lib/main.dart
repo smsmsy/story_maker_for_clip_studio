@@ -201,9 +201,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             ),
                             Container(
                               decoration: BoxDecoration(
-                                  border: Border.all(width: 1.0),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(_radiusValue))),
+                                border: Border.all(width: 1.0),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(_radiusValue),
+                                ),
+                              ),
                               margin: const EdgeInsets.only(top: 5.0),
                               height: 230.0,
                               child: ListView.builder(
@@ -405,9 +407,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     ),
 
                     Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(width: 2),
-                      ),
+                      decoration: BoxDecoration(border: Border.all(width: 2),),
                       padding: const EdgeInsets.all(_edgeValueMedium),
                       height: 500,
                       child: Stack(
@@ -467,47 +467,49 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ConstrainedBox(
-                  constraints: const BoxConstraints(),
-                  child: ElevatedButton(
-                    child: const Text(
-                      "読む用出力",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15,),
-                    ),
-                    onPressed: () async {
-                      if (contents
-                          .any((content) => content.line == "")) {
-                        ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                        if (selection == ResultAlertDialog.ok) {
-                          _outputForReading(context);
-                        }
-                      } else {
+                constraints: const BoxConstraints(),
+                child: ElevatedButton(
+                  child: const Text(
+                    "読む用出力",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15,),
+                  ),
+                  onPressed: () async {
+                    if (contents
+                        .any((content) => content.line == "")) {
+                      ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                      if (selection == ResultAlertDialog.ok) {
                         _outputForReading(context);
                       }
-                    },
-                  )),
+                    } else {
+                      _outputForReading(context);
+                    }
+                  },
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ConstrainedBox(
-                  constraints: const BoxConstraints(),
-                  child: ElevatedButton(
-                    child: const Text(
-                      "クリスタ用出力",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15),
-                    ),
-                    onPressed: () async {
-                      if (contents.any((content) => content.line == "")) {
-                        ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                        if (selection == ResultAlertDialog.ok) {
-                          _outputForNameChanger(context);
-                        }
-                      } else {
+                constraints: const BoxConstraints(),
+                child: ElevatedButton(
+                  child: const Text(
+                    "クリスタ用出力",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  onPressed: () async {
+                    if (contents.any((content) => content.line == "")) {
+                      ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                      if (selection == ResultAlertDialog.ok) {
                         _outputForNameChanger(context);
                       }
-                    },
-                  )),
+                    } else {
+                      _outputForNameChanger(context);
+                    }
+                  },
+                ),
+              ),
             ),
           ],
         ),
@@ -635,15 +637,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   width: 50.0,
                   height: 20.0,
                   child: OutlinedButton(
-                    onPressed: () => setState(() {
+                    onPressed: () => setState( () {
                       if(contents[index].hasPageEnd) {
                         contents[index].hasPageEnd = false;
                         contents.removeAt(index + 1);
                       } else {
                         contents[index].hasPageEnd = true;
                         contents.insert(index + 1, const Divider());
-                      }
-                    }),
+                      }},
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -709,8 +711,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             TextButton(
               onPressed: () {
                 setState(() {
-                  contents[index]
-                      .controller
+                  contents[index].controller
                       .removeListener(_reflectTextValueForContentsView);
                   contents.removeAt(index);
                 });
@@ -768,18 +769,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     for(int i = 0; i < index ; i++){
       if(contents[i] is Divider) continue;
       if(contents[i].hasPageEnd) count++;
-
     }
     return count;
   }
 
   Future<Color?> openColorSettingDialog(BuildContext context) {
     return showDialog<Color>(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return ColorSettingDialog(memo.color);
-        });
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ColorSettingDialog(memo.color),
+    );
   }
 
   Future<void> _showEditPersonPage(Person person) async {
@@ -793,27 +792,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Future<void> _showPersonRemoveAlertDialog(int index) async {
     late ResultAlertDialog ans;
     ans = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("人物削除について注意"),
-            content: const Text("人物を削除すると作成済みの同じ人物のコンテンツも削除されますがよろしいでしょうか？"),
-            actions: <Widget>[
-              SimpleDialogOption(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.pop(context, ResultAlertDialog.ok);
-                },
-              ),
-              SimpleDialogOption(
-                child: const Text('キャンセル'),
-                onPressed: () {
-                  Navigator.pop(context, ResultAlertDialog.cancel);
-                },
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("人物削除について注意"),
+          content: const Text("人物を削除すると作成済みの同じ人物のコンテンツも削除されますがよろしいでしょうか？"),
+          actions: <Widget>[
+            SimpleDialogOption(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.pop(context, ResultAlertDialog.ok);
+              },
+            ),
+            SimpleDialogOption(
+              child: const Text('キャンセル'),
+              onPressed: () {
+                Navigator.pop(context, ResultAlertDialog.cancel);
+              },
+            ),
+          ],
+        );
+      },
+    );
     switch (ans) {
       case ResultAlertDialog.ok:
         setState(() {
@@ -840,43 +840,45 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     contentsForOutputToNameChanger = generateContentsToTextFile();
 
     return showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              title: const Text("ネームチェンジャー用出力プレビュー"),
-              content: Container(
-                padding: const EdgeInsets.all(_edgeValueMedium),
-                margin: const EdgeInsets.all(_edgeValueMedium),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1.0),
-                  borderRadius:
-                    const BorderRadius.all(Radius.circular(_radiusValue)),
-                ),
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    child: SelectableText(
-                      contentsForOutputToNameChanger,
-                    ),
-                  ),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("ネームチェンジャー用出力プレビュー"),
+          content: Container(
+            padding: const EdgeInsets.all(_edgeValueMedium),
+            margin: const EdgeInsets.all(_edgeValueMedium),
+            decoration: BoxDecoration(
+              border: Border.all(width: 1.0),
+              borderRadius: const BorderRadius.all(Radius.circular(_radiusValue),),
+            ),
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                child: SelectableText(
+                  contentsForOutputToNameChanger,
                 ),
               ),
-              actions: <Widget>[
-                ElevatedButton(
-                    child: const Text("クリップボードにコピー"),
-                    onPressed: () async {
-                      final data =
-                        ClipboardData(text: contentsForOutputToNameChanger);
-                      await Clipboard.setData(data);
-                    }),
-                TextButton(
-                    child: const Text("閉じる"),
-                    onPressed: () {
-                      contentsForOutputToNameChanger = "";
-                      Navigator.of(context).pop();
-                    }),
-              ]);
-        });
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text("クリップボードにコピー"),
+              onPressed: () async {
+                final data = ClipboardData(text: contentsForOutputToNameChanger);
+                await Clipboard.setData(data);
+              },
+            ),
+            TextButton(
+              child: const Text("閉じる"),
+              onPressed: () {
+                contentsForOutputToNameChanger = "";
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String generateContentsToTextFile() {
@@ -901,26 +903,30 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> _showWarningLineEmpty() async {
     return showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return SingleChildScrollView(
-            child: AlertDialog(
-                title: const Text("警告"),
-                content: const Text("空白のコンテンツが含まれます。\n削除して出力しますがよろしいでしょうか？"),
-                actions: <Widget>[
-                  TextButton(
-                      child: const Text("OK"),
-                      onPressed: () {
-                        Navigator.of(context).pop(ResultAlertDialog.ok);
-                      }),
-                  TextButton(
-                      child: const Text("キャンセル"),
-                      onPressed: () {
-                        Navigator.of(context).pop(ResultAlertDialog.cancel);
-                      })
-                ]),
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text("警告"),
+            content: const Text("空白のコンテンツが含まれます。\n削除して出力しますがよろしいでしょうか？"),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop(ResultAlertDialog.ok);
+                },
+              ),
+              TextButton(
+                child: const Text("キャンセル"),
+                onPressed: () {
+                  Navigator.of(context).pop(ResultAlertDialog.cancel);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   double maxContext() {
