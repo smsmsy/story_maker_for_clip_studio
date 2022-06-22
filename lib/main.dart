@@ -465,7 +465,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(_edgeValueLarge),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(),
                 child: ElevatedButton(
@@ -489,7 +489,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(_edgeValueLarge),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(),
                 child: ElevatedButton(
