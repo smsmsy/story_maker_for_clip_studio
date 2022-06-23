@@ -96,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     persons.add(
       Person(name: "サンプル 太郎", color: Colors.blue, hasMood: true),
     );
+
     contents.add(
       Content(
         person: memo,
@@ -503,10 +504,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         .any((content) => content.line == "")) {
                       ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
                       if (selection == ResultAlertDialog.ok) {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewPDFPage(contents)));
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => PreviewPDFPage(_bookTitle, contents),),
+                        );
                       }
                     } else {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PreviewPDFPage(contents)));
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => PreviewPDFPage(_bookTitle, contents),),
+                      );
                     }
                   },
                 ),

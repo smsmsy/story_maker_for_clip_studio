@@ -16,6 +16,7 @@ class Content {
   TextEditingController controller;
   bool hasPageEnd;
 
+
 //<editor-fold desc="Data Methods">
 
   Content({
@@ -25,6 +26,17 @@ class Content {
     required this.controller,
     required this.hasPageEnd,
   });
+
+  String get contentIcon{
+    switch(contentType){
+      case ContentType.memo:
+        return "📝";
+      case ContentType.serif:
+        return "💬";
+      case ContentType.mood:
+        return "💭";
+    }
+  }
 
   @override
   bool operator ==(Object other) =>

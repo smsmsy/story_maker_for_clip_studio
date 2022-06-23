@@ -13,6 +13,7 @@ import 'package:printing/printing.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 
+import 'package:story_maker_for_clip_studio/classes/content_class.dart' as cc;
 
 // なんかこいつ怪しいが・・・
 // rootBundle用に入れたけどいらないかも
@@ -21,8 +22,9 @@ import 'package:open_file/open_file.dart';
 
 class PreviewPDFPage extends StatefulWidget {
   final List<dynamic> contents;
+  final String title;
 
-  const PreviewPDFPage(this.contents, {Key? key}) : super(key: key);
+  const PreviewPDFPage(this.title, this.contents, {Key? key}) : super(key: key);
 
   @override
   State<PreviewPDFPage> createState() => _PreviewPDFPageState();
@@ -71,13 +73,17 @@ class _PreviewPDFPageState extends State<PreviewPDFPage> with SingleTickerProvid
           canDebug: false,
           loadingWidget: const LinearProgressIndicator(),
           build: (PdfPageFormat format) async {
-            final pdf = await PdfCreator.create();
+            final pdf = await PdfCreator.create(widget.title, widget.contents);
             return await pdf.save();
           },
           actions: actions,
           onPrinted: _showPrintedToast,
           onShared: _showSharedToast,
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Icon(Icons.arrow_back_ios_new),
       ),
     );
   }
@@ -117,7 +123,7 @@ class _PreviewPDFPageState extends State<PreviewPDFPage> with SingleTickerProvid
 }
 
 class PdfCreator {
-  static Future<pw.Document> create() async {
+  static Future<pw.Document> create(String title, List<dynamic> contents) async {
     // フォントの読み込みとオブジェクト化
     final font = await PdfGoogleFonts.shipporiMinchoRegular();
     // final fontData = await rootBundle.load("源柔ゴシックＰ");
@@ -135,7 +141,23 @@ class PdfCreator {
           child: pw.FlutterLogo(),
         ),
       ),
-      build: (context) => _buildPage(),
+      // header: (pw.Context context) {
+      //   return pw.Container(
+      //     alignment: pw.Alignment.centerRight,
+      //     margin: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
+      //     padding: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
+      //     decoration: const pw.BoxDecoration(
+      //       border: pw.Border(
+      //         bottom: pw.BorderSide(width: 0.5, color: PdfColors.grey),
+      //       ),
+      //     ),
+      //     child: pw.Text(
+      //       title,
+      //       style: pw.Theme.of(context).defaultTextStyle.copyWith(color: PdfColors.grey),
+      //     ),
+      //   );
+      // },
+      build: (context) => _buildPDFPage(contents),
     );
 
     pdf.addPage(cover);
@@ -143,11 +165,33 @@ class PdfCreator {
     return pdf;
   }
 
-  static _buildPage() {
+  static _buildPDFPage(List<dynamic> contents) {
     return pw.Center(
       child: pw.Column(
         children: <pw.Widget> [
-          pw.Text('test page'),
+          pw.Table(
+            children: List.generate(
+              contents.length, (index) => pw.TableRow(
+              children: <pw.Widget> [_buildPDFTableRow(index, contents),],),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static _buildPDFTableRow(int index, List<dynamic> contents) {
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text('No.$index'),
+          // pw.Text(contents[index].contentIcon),
+          pw.Text(contents[index].person.name),
+          pw.Text(contents[index].line),
         ],
       ),
     );
