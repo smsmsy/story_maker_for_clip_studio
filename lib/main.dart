@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+
 import 'package:story_maker_for_clip_studio/classes/content_class.dart';
 import 'package:story_maker_for_clip_studio/classes/person_class.dart';
 
@@ -409,25 +410,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       ],
                     ),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: const Text("📝", style: TextStyle(fontSize: 25),),
                         ),
-                        Flexible(
-                          child: Container(
-                            margin: const EdgeInsets.all(_edgeValueSmall),
-                            height: 50.0,
-                            child: buildAddContentsButton(memo, ContentType.memo),
-                          ),
+                        Container(
+                          margin: const EdgeInsets.all(_edgeValueSmall),
+                          height: 50.0,
+                          child: buildAddContentsButton(memo, ContentType.memo),
                         ),
-                      ],
-                    ),
+                        Expanded(
+                          child: Container(),
 
-                    const Divider(
-                      thickness: 0,
-                      height: 10.0,
+                        ),
+                        Text(
+                          "総ページ数：${getTotalPageNum(contents)}",
+                          style: const TextStyle(fontSize: 18.0,),
+                        ),
+                        const SizedBox(width: 30.0,),
+                      ],
                     ),
 
                     Container(
@@ -500,19 +504,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     style: TextStyle(fontSize: 15,),
                   ),
                   onPressed: () async {
-                    if (contents
-                        .any((content) => content.line == "")) {
-                      ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                      if (selection == ResultAlertDialog.ok) {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => PreviewPDFPage(_bookTitle, contents),),
-                        );
-                      }
-                    } else {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => PreviewPDFPage(_bookTitle, contents),),
-                      );
-                    }
+                    // if (contents.any((content) => content.line == "")) {
+                    //   ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
+                    //   if (selection == ResultAlertDialog.ok) {
+                    //     Navigator.of(context).push(MaterialPageRoute(
+                    //       builder: (context) => PreviewPDFPage(_bookTitle, contents),),
+                    //     );
+                    //   }
+                    // } else {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PreviewPDFPage(_bookTitle, contents),),);
+                      // );
+                    // }
                   },
                 ),
               ),
@@ -778,7 +781,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           width: 100.0,
           alignment: Alignment.center,
           child: Text(
-            "Page ${getPageNum(index)}",
+            "Page ${getCurrentPageNum(index, contents)} / ${getTotalPageNum(contents)}",
             style: const TextStyle(),
           ),
         ),
@@ -793,14 +796,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
-  int getPageNum(int index) {
-    int count = 0;
-    for(int i = 0; i < index ; i++){
-      if(contents[i] is Divider) continue;
-      if(contents[i].hasPageEnd) count++;
-    }
-    return count;
-  }
+  // int getPageNum(int index) {
+  //   int count = 0;
+  //   for(int i = 0; i < index ; i++){
+  //     if(contents[i] is Divider) count++;
+  //     // if(contents[i].hasPageEnd) count++;
+  //   }
+  //   return count;
+  // }
 
   Future<Color?> openColorSettingDialog(BuildContext context) {
     return showDialog<Color>(
@@ -988,4 +991,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       },
     );
   }
+
+  int getTotalPageNum(List<dynamic> contents) {
+    int count = 1;
+    for(int i = 0; i < contents.length - 1; i++){
+      if(contents[i] is Divider) count++;
+    }
+    return count;
+  }
+  int getCurrentPageNum(int index, List<dynamic> contents) {
+    int count = 0;
+    for(int i = 0; i <= index; i++){
+      if(contents[i] is Divider) count++;
+    }
+    return count;
+  }
+
 }

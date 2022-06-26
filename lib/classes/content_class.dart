@@ -1,4 +1,6 @@
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
+
+import 'package:flutter/material.dart';
 
 import 'person_class.dart';
 
@@ -27,14 +29,14 @@ class Content {
     required this.hasPageEnd,
   });
 
-  String get contentIcon{
+  String get contentTypeText{
     switch(contentType){
       case ContentType.memo:
-        return "📝";
+        return "";
       case ContentType.serif:
-        return "💬";
+        return "セリフ";
       case ContentType.mood:
-        return "💭";
+        return "心情";
     }
   }
 
