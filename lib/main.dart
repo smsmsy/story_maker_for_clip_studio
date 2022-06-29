@@ -98,16 +98,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     persons.add(Person(name: "サンプル 太郎", color: Colors.blue, hasMood: true),);
     // persons.add(Person(name: "山田　花子", color: Colors.red, hasMood: true),);
 
-    for(int i = 0; i < 5; i ++){
-      contents.add(
-        Content(
-          person: memo, line: "",
-          contentType: ContentType.memo,
-          controller: TextEditingController(),
-          hasPageEnd: false
-        ),
-      );
-    }
+    contents.add(
+      Content(
+        person: memo, line: "",
+        contentType: ContentType.memo,
+        controller: TextEditingController(),
+        hasPageEnd: false
+      ),
+    );
 
     for (int i = 0; i < contents.length; i++) {
       if(contents[i] is! Divider) {
