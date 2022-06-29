@@ -505,18 +505,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     style: TextStyle(fontSize: 15,),
                   ),
                   onPressed: () async {
-                    // if (contents.any((content) => content.line == "")) {
-                    //   ResultAlertDialog selection = await _showWarningLineEmpty() as ResultAlertDialog;
-                    //   if (selection == ResultAlertDialog.ok) {
-                    //     Navigator.of(context).push(MaterialPageRoute(
-                    //       builder: (context) => PreviewPDFPage(_bookTitle, contents),),
-                    //     );
-                    //   }
-                    // } else {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => PreviewPDFPage(_bookTitle, contents),),);
-                      // );
-                    // }
+                      builder: (context) => PreviewPDFPage(_bookTitle, contents),),
+                    );
                   },
                 ),
               ),
