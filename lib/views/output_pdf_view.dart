@@ -113,7 +113,7 @@ class _PreviewPDFPageState extends State<PreviewPDFPage> with SingleTickerProvid
     final bytes = await build(pageFormat);
     final appDocDir = await getApplicationDocumentsDirectory();
     final appDocPath = appDocDir.path;
-    final file = File(appDocPath + '/' + 'document.pdf');
+    final file = File(appDocPath + '/' + widget.title + '.pdf');
     if (kDebugMode) {
       print('Save as file ${file.path} ...');
     }
@@ -137,14 +137,10 @@ class PdfCreator {
         theme: pw.ThemeData.withFont(base: font),
         pageFormat: PdfPageFormat.a4,
         orientation: pw.PageOrientation.portrait,
-        buildBackground: (context) => pw.Opacity(
-          opacity: 0.3,
-          child: pw.FlutterLogo(),
-        ),
       ),
       header: (pw.Context context) {
         return pw.Container(
-          alignment: pw.Alignment.centerRight,
+          alignment: pw.Alignment.center,
           margin: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
           padding: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
           decoration: const pw.BoxDecoration(
@@ -160,6 +156,16 @@ class PdfCreator {
             ),
           ),
         );
+      },
+      footer: (pw.Context context) {
+        return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+            child: pw.Text(
+                '${context.pageNumber} / ${context.pagesCount}',
+                style: pw.Theme.of(context)
+                    .defaultTextStyle
+                    .copyWith(color: PdfColors.grey)));
       },
       build: (context) => List.generate(contents.length, (index) => _buildPDFTableRow(index, contents, emoji),),
     );

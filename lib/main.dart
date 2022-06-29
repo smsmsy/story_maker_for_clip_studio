@@ -183,7 +183,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    /// SettingsView
+
+                    /// 設定画面
                     Container(
                       padding: const EdgeInsets.all(_edgeValueMedium),
                       color: isDark
@@ -352,12 +353,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         ),
                       ),
                     ),
-                    const Divider(
-                      thickness: 0,
-                      height: 10.0,
-                    ),
 
-                    /// PersonListView
+                    const Divider(thickness: 0, height: 10.0,),
+
+                    // セリフ追加ボタン
                     Row(
                       children: [
                         Container(
@@ -380,6 +379,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         ),
                       ],
                     ),
+
+                    // 心情追加ボタン
                     Row(
                       children: [
                         Container(
@@ -410,6 +411,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         ),
                       ],
                     ),
+
+                    // メモ追加ボタンとページ数表示
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -435,6 +438,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       ],
                     ),
 
+                    // コンテンツ編集画面
                     Container(
                       decoration: BoxDecoration(border: Border.all(width: 2),),
                       padding: const EdgeInsets.all(_edgeValueMedium),
@@ -494,6 +498,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
 
+            // PDF出力
             Padding(
               padding: const EdgeInsets.all(_edgeValueLarge),
               child: ConstrainedBox(
@@ -512,6 +517,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 ),
               ),
             ),
+
+            // テキスト出力
             Padding(
               padding: const EdgeInsets.all(_edgeValueLarge),
               child: ConstrainedBox(
