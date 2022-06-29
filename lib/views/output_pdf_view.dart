@@ -61,6 +61,9 @@ class _PreviewPDFPageState extends State<PreviewPDFPage> with SingleTickerProvid
     ];
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("PDFプレビュー"),
+      ),
       body: Center(
         child: PdfPreview(
           maxPageWidth: 600,
@@ -108,7 +111,6 @@ class _PreviewPDFPageState extends State<PreviewPDFPage> with SingleTickerProvid
       PdfPageFormat pageFormat,
       ) async {
     final bytes = await build(pageFormat);
-
     final appDocDir = await getApplicationDocumentsDirectory();
     final appDocPath = appDocDir.path;
     final file = File(appDocPath + '/' + 'document.pdf');
@@ -122,12 +124,13 @@ class _PreviewPDFPageState extends State<PreviewPDFPage> with SingleTickerProvid
 
 class PdfCreator {
   static Future<pw.Document> create(String title, List<dynamic> contents) async {
+
     // フォントの読み込みとオブジェクト化
-    // final font = await PdfGoogleFonts.shipporiMinchoRegular();
     final fontData = await rootBundle.load("assets/fonts/GenJyuuGothic-P-Regular.ttf");
     final font = pw.Font.ttf(fontData);
 
     final pdf = pw.Document(author: 'Me');
+    final emoji = await PdfGoogleFonts.notoColorEmoji();
 
     final cover = pw.MultiPage(
       pageTheme: pw.PageTheme(
@@ -150,12 +153,15 @@ class PdfCreator {
             ),
           ),
           child: pw.Text(
-            title,
-            style: pw.Theme.of(context).defaultTextStyle.copyWith(color: PdfColors.grey),
+            " タイトル : $title",
+            style: pw.Theme.of(context).defaultTextStyle.copyWith(
+              color: PdfColors.grey,
+              fontSize: 18.0,
+            ),
           ),
         );
       },
-      build: (context) => [_buildPDFPage(contents)],
+      build: (context) => List.generate(contents.length, (index) => _buildPDFTableRow(index, contents, emoji),),
     );
 
     pdf.addPage(cover);
@@ -163,89 +169,85 @@ class PdfCreator {
     return pdf;
   }
 
-  static _buildPDFPage(List<dynamic> contents) {
-    return pw.Center(
-      child: pw.Column(
-        children: <pw.Widget> [
-          pw.Table(
-            children: List.generate(
-              contents.length, (index) => pw.TableRow(
-              children: <pw.Widget> [_buildPDFTableRow(index, contents),],),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static _buildPDFTableRow(int index, List<dynamic> contents) {
-    return pw.Container(
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.start,
-        children: [
-          if(contents[index] is Divider)
-            pw.Row(
-              children: [
-                pw.Expanded(child: pw.Divider(),),
-                pw.Text("${currentPageNum(index, contents)} / ${totalPageNum(contents)}"),
-                pw.Expanded(child: pw.Divider(),),
-              ],
-            ),
-          if(contents[index] is! Divider)
-            if(contents[index].contentType != cc.ContentType.memo)
-              if(contents[index].contentType == cc.ContentType.serif)
-                pw.Row(
-                  children: [
-                    // 名前
-                    pw.Text(
-                      contents[index].person.name,
-                      style: pw.TextStyle(
-                        color: PdfColor.fromInt(contents[index].person.color.value),
-                      ),
-                    ),
-                    // Icon
-                    // pw.Text(),
-                    pw.SizedBox(width: 20.0),
-                    // 内容
-                    pw.Text(" 「 ${contents[index].line} 」"),
-                  ],
-                ),
-          if(contents[index] is! Divider)
-            if(contents[index].contentType != cc.ContentType.memo)
-              if(contents[index].contentType == cc.ContentType.mood)
-                pw.Row(
-                  children: [
-                    // 名前
-                    pw.Text(
-                      contents[index].person.name,
-                      style: pw.TextStyle(
-                        color: PdfColor.fromInt(contents[index].person.color.value),
-                      ),
-                    ),
-                    // Icon
-                    // pw.Text(),
-                    pw.SizedBox(width: 20.0),
-                    // 内容
-                    pw.Text(" ( ${contents[index].line} ) "),
-                  ],
-                ),
-          if(contents[index] is! Divider)
-            if(contents[index].contentType == cc.ContentType.memo)
+  static pw.Widget _buildPDFTableRow(int index, List<dynamic> contents, pw.Font emoji){
+    if (contents[index] is Divider) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 5.0),
+        child:pw.Center(
+          child: pw.Row(
+            children: [
+              pw.Expanded(child: pw.Divider(color: const PdfColorGrey(0.5),),),
+              pw.SizedBox(width: 15.0),
               pw.Text(
-                contents[index].line,
+                "Page : ${currentPageNum(index, contents)} / ${totalPageNum(contents)}",
+                style: const pw.TextStyle(color: PdfColorGrey(0.5), fontSize: 15.0,),
+              ),
+              pw.SizedBox(width: 15.0),
+              pw.Expanded(child: pw.Divider(color: const PdfColorGrey(0.5),),),
+            ],
+          ),
+        ),
+      );
+    }
+
+    else if(contents[index].contentType == cc.ContentType.memo) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 5.0),
+        child: pw.Row(
+          children: [
+            pw.Text(
+              "📝",
+              style: pw.TextStyle(
+                fontFallback: [emoji],
+                fontSize: 18,
+              ),
+            ),
+            pw.SizedBox(width: 15.0),
+            pw.Text(
+              contents[index].line,
+              style: pw.TextStyle(
+                color: PdfColor.fromInt(contents[index].person.color.value),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    else {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 5.0),
+        child: pw.Row(
+          children: [
+            pw.SizedBox(
+              width: 80.0,
+              child:pw.Text(
+                contents[index].person.name,
                 style: pw.TextStyle(
                   color: PdfColor.fromInt(contents[index].person.color.value),
                 ),
               ),
-        ],
-      ),
-    );
+            ),
+            pw.SizedBox(width: 15.0),
+            pw.Text(
+              contents[index].contentType == cc.ContentType.serif ? "💬": "💭",
+              style: pw.TextStyle(
+                fontFallback: [emoji],
+                fontSize: 18,
+              ),
+            ),
+            pw.SizedBox(width: 15.0),
+            pw.Text(contents[index].line),
+          ],
+        ),
+      );
+    }
   }
 
   static int currentPageNum(int index, List<dynamic> contents){
     int count = 1;
     for(int i = 0; i < index; i++){
-      if(contents[i] is Divider) count;
+      if(contents[i] is Divider) count++;
     }
     return count;
   }
@@ -253,10 +255,9 @@ class PdfCreator {
   static int totalPageNum(List<dynamic> contents){
     int count = 0;
     for(int i = 0; i < contents.length; i++){
-      if(contents[i] is Divider) count;
+      if(contents[i] is Divider) count++;
     }
     return count;
   }
-
 
 }
